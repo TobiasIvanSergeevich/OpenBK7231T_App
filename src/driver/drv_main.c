@@ -1245,6 +1245,22 @@ static driver_t g_drivers[] = {
 	false,                                   // loaded
 	},
 #endif
+#if ENABLE_DRIVER_SHTC3
+	//drvdetail:{"name":"SHTC3",
+	//drvdetail:"title":"TODO",
+	//drvdetail:"descr":"Humidity/temperature sensor.",
+	//drvdetail:"requires":""}
+	{ "SHTC3",                               // Driver Name
+	SHTC3_Init,                              // Init
+	SHTC3_OnEverySecond,                     // onEverySecond
+	SHTC3_AppendInformationToHTTPIndexPage,  // appendInformationToHTTPIndexPage
+	NULL,                                    // runQuickTick
+	SHTC3_StopDriver,                        // stopFunction
+	NULL,                                    // onChannelChanged
+	NULL,                                    // onHassDiscovery
+	false,                                   // loaded
+	},
+#endif
 #if ENABLE_DRIVER_SGP
 	//drvdetail:{"name":"SGP",
 	//drvdetail:"title":"TODO",
@@ -1870,7 +1886,7 @@ bool DRV_IsMeasuringBattery() {
 
 bool DRV_IsSensor() {
 #ifndef OBK_DISABLE_ALL_DRIVERS
-	return DRV_IsRunning("SHT3X") || DRV_IsRunning("CHT83XX") || DRV_IsRunning("SGP") || DRV_IsRunning("AHT2X") || DRV_IsRunning("DS1820") || DRV_IsRunning("DS1820_full");
+	return DRV_IsRunning("SHT3X") || DRV_IsRunning("SHTC3") || DRV_IsRunning("CHT83XX") || DRV_IsRunning("SGP") || DRV_IsRunning("AHT2X") || DRV_IsRunning("DS1820") || DRV_IsRunning("DS1820_full");
 #else
 	return false;
 #endif
