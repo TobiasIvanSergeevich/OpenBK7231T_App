@@ -325,3 +325,10 @@ void TinyIR_NEC_RunFrame();
 void DRV_ESPHome_API_Init();
 void DRV_ESPHome_API_Deinit();
 void DRV_ESPHome_API_OnEverySecond();
+
+void HWSPI_Init();
+void HWSPI_Stop();
+
+void st7789_Init();
+void st7789_AppendInformationToHTTPIndexPage(http_request_t* request, int bPreState);
+void st7789_Stop();

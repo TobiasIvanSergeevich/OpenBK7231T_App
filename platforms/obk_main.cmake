@@ -34,6 +34,7 @@ set(OBKM_SRC
 	${OBK_SRCS}hal/generic/hal_pins_generic.c
 	${OBK_SRCS}hal/generic/hal_wifi_generic.c
 	${OBK_SRCS}hal/generic/hal_uart_generic.c
+	${OBK_SRCS}hal/generic/hal_spi_generic.c
 	${OBK_SRCS}httpserver/hass.c
 	${OBK_SRCS}httpserver/http_basic_auth.c
 	${OBK_SRCS}httpserver/http_fns.c
@@ -161,6 +162,8 @@ set(OBKM_SRC
 	${OBK_SRCS}driver/drv_ucs1912.c
 	${OBK_SRCS}driver/drv_wemo.c
 	${OBK_SRCS}driver/drv_widget.c
+	${OBK_SRCS}driver/drv_spibus.c
+	${OBK_SRCS}driver/drv_st7789.c
 	${OBK_SRCS}i2c/drv_i2c_ads1115.c
 	${OBK_SRCS}i2c/drv_i2c_lcd_pcf8574t.c
 	${OBK_SRCS}i2c/drv_i2c_main.c

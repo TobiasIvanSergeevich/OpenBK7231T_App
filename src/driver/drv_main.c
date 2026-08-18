@@ -1570,7 +1570,39 @@ static driver_t g_drivers[] = {
 	NULL,                                    // onChannelChanged
 	NULL,                                    // onHassDiscovery
 	false,                                   // loaded
-	}
+	},
+#endif
+#if ENABLE_DRIVER_SPIBUS	
+	//drvdetail:{"name":"HWSPI",
+	//drvdetail:"title":"TODO",
+	//drvdetail:"descr":"Hardware SPI driver.",
+	//drvdetail:"requires":""}	
+	{ "HWSPI",                               // Driver Name
+	HWSPI_Init,                              // Init
+	NULL,                                    // onEverySecond
+	NULL,                                    // appendInformationToHTTPIndexPage
+	NULL,                                    // runQuickTick
+	HWSPI_Stop,                              // stopFunction
+	NULL,                                    // onChannelChanged
+	NULL,                                    // onHassDiscovery
+	false,                                   // loaded
+	},
+#endif
+#if ENABLE_DRIVER_ST7789	
+	//drvdetail:{"name":"ST7789",
+	//drvdetail:"title":"TODO",
+	//drvdetail:"descr":"TFT display driver via SPI.",
+	//drvdetail:"requires":"HWSPI driver"}	
+	{ "ST7789",                               // Driver Name
+	st7789_Init,                              // Init
+	NULL,                                    // onEverySecond
+	st7789_AppendInformationToHTTPIndexPage,                                    // appendInformationToHTTPIndexPage
+	NULL,                                    // runQuickTick
+	st7789_Stop,                              // stopFunction
+	NULL,                                    // onChannelChanged
+	NULL,                                    // onHassDiscovery
+	false,                                   // loaded
+	},
 #endif
 	//{ "", NULL, NULL, NULL, NULL, NULL, NULL, NULL, false },
 };

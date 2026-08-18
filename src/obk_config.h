@@ -661,6 +661,7 @@
 #define ENABLE_DRIVER_SHTC3						1
 #define ENABLE_DRIVER_TUYAMCU					1
 #define ENABLE_DRIVER_MDNS						1
+#define ENABLE_DRIVER_SPIBUS                    1
 #define ENABLE_DRIVER_ST7789					1
 
 //#define ENABLE_DRIVER_DCF77					1
