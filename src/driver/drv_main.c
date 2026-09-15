@@ -1421,6 +1421,54 @@ static driver_t g_drivers[] = {
 	//drvdetail:"title":"TODO",
 	//drvdetail:"descr":"Custom mechanism to measure battery level with ADC and an optional relay. See [example here](https://www.elektroda.com/rtvforum/topic3959103.html).",
 	//drvdetail:"requires":""}
+#if ENABLE_DRIVER_BKCHARGE
+	//drvdetail:{"name":"BKCharge",
+	//drvdetail:"title":"TODO",
+	//drvdetail:"descr":"Reports the state of the BK7252N on-chip Li-ion charger: trickle, CC, CV, full, recharge and USB present. Publishes charging, charge_full and usb_power over MQTT and can drive a channel.",
+	//drvdetail:"requires":""}
+	{ "BKCharge",                            // Driver Name
+	BKCharge_Init,                                // Init
+	BKCharge_OnEverySecond,                       // onEverySecond
+	BKCharge_AppendInformationToHTTPIndexPage,    // appendInformationToHTTPIndexPage
+	NULL,                                    // runQuickTick
+	BKCharge_StopDriver,                          // stopFunction
+	NULL,                                    // onChannelChanged
+	NULL,                                    // onHassDiscovery
+	false,                                   // loaded
+	},
+#endif
+#if ENABLE_DRIVER_BKSDCARD
+	//drvdetail:{"name":"BKSDCard",
+	//drvdetail:"title":"TODO",
+	//drvdetail:"descr":"Drives the BK7252N SD host, reports the card in the slot and reads raw blocks.",
+	//drvdetail:"requires":""}
+	{ "BKSDCard",                            // Driver Name
+	BKSDCard_Init,                           // Init
+	BKSDCard_OnEverySecond,                  // onEverySecond
+	BKSDCard_AppendInformationToHTTPIndexPage, // appendInformationToHTTPIndexPage
+	NULL,                                    // runQuickTick
+	BKSDCard_StopDriver,                     // stopFunction
+	NULL,                                    // onChannelChanged
+	NULL,                                    // onHassDiscovery
+	false,                                   // loaded
+	},
+#endif
+#if ENABLE_DRIVER_BKAUDIO
+	//drvdetail:{"name":"BKAudio",
+	//drvdetail:"title":"TODO",
+	//drvdetail:"descr":"Captures from the BK7252N on-chip audio ADC and reports the level: RMS, peak, and a peak held until it is read. The ring buffer is drained from the quick tick, and the driver reports the sample rate it actually observes so that coverage can be checked.",
+	//drvdetail:"requires":""}
+	{ "BKAudio",                             // Driver Name
+	BKAudio_Init,                            // Init
+	BKAudio_OnEverySecond,                   // onEverySecond
+	BKAudio_AppendInformationToHTTPIndexPage, // appendInformationToHTTPIndexPage
+	BKAudio_RunQuickTick,                    // runQuickTick
+	BKAudio_StopDriver,                      // stopFunction
+	NULL,                                    // onChannelChanged
+	NULL,                                    // onHassDiscovery
+	false,                                   // loaded
+	},
+#endif
 	{ "Battery",                             // Driver Name
 	Batt_Init,                               // Init
 	Batt_OnEverySecond,                      // onEverySecond
