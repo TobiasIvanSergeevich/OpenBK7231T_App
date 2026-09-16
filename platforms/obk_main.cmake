@@ -164,6 +164,10 @@ set(OBKM_SRC
 	${OBK_SRCS}driver/drv_widget.c
 	${OBK_SRCS}driver/drv_spibus.c
 	${OBK_SRCS}driver/drv_st7789.c
+	${OBK_SRCS}driver/drv_idisplay.c
+	${OBK_SRCS}driver/drv_microui.c
+	${OBK_SRCS}driver/drv_microui_core.c
+	${OBK_SRCS}driver/drv_microui_renderer.c
 	${OBK_SRCS}i2c/drv_i2c_ads1115.c
 	${OBK_SRCS}i2c/drv_i2c_lcd_pcf8574t.c
 	${OBK_SRCS}i2c/drv_i2c_main.c
@@ -176,6 +180,7 @@ set(OBKM_SRC
 
 if(NOT DEFINED SDK_CJSON)
 	set(OBKM_SRC ${OBKM_SRC} ${OBK_SRCS}cJSON/cJSON.c)
+	set(OBKM_SRC ${OBKM_SRC} ${OBK_SRCS}cJSON/jsmn_stream.c)
 endif()
 
 if(NOT DEFINED SDK_LFS)

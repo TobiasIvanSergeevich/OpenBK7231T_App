@@ -670,6 +670,7 @@
 #define ENABLE_DRIVER_MDNS						1
 #define ENABLE_DRIVER_SPIBUS                    1
 #define ENABLE_DRIVER_ST7789					1
+#define ENABLE_DRIVER_MICROUI                   1
 
 //#define ENABLE_DRIVER_DCF77					1
 

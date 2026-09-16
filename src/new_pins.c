@@ -1655,6 +1655,12 @@ int CHANNEL_Get(int ch) {
 	if (ch >= SPECIAL_CHANNEL_FLASHVARS_FIRST && ch <= SPECIAL_CHANNEL_FLASHVARS_LAST) {
 		return HAL_FlashVars_GetChannelValue(ch - SPECIAL_CHANNEL_FLASHVARS_FIRST);
 	}
+	if (ch == SPECIAL_CHANNEL_MQTTCONNECTED) {
+		return Main_HasMQTTConnected();
+	}
+	if (ch == SPECIAL_CHANNEL_WIFICONNECTED) {
+		return Main_HasWiFiConnected();
+	}
 	if (ch < 0 || ch >= CHANNEL_MAX) {
 		addLogAdv(LOG_ERROR, LOG_FEATURE_GENERAL, "CHANNEL_Get: Channel index %i is out of range <0,%i)", ch, CHANNEL_MAX);
 		return 0;

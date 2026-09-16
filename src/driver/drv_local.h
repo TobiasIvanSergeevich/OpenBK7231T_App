@@ -356,3 +356,10 @@ void HWSPI_Stop();
 void st7789_Init();
 void st7789_AppendInformationToHTTPIndexPage(http_request_t* request, int bPreState);
 void st7789_Stop();
+
+void MicroUI_Init();
+void MicroUI_OnEverySecond();
+void MicroUI_AppendInformationToHTTPIndexPage(http_request_t* request, int bPreState);
+void MicroUI_QuickFrame();
+void MicroUI_OnChannelChanged(int ch, int value);
+void MicroUI_Stop();

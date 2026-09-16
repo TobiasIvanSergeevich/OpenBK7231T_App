@@ -1652,6 +1652,22 @@ static driver_t g_drivers[] = {
 	false,                                   // loaded
 	},
 #endif
+#if ENABLE_DRIVER_MICROUI	
+	//drvdetail:{"name":"MicroUI",
+	//drvdetail:"title":"MicroUI",
+	//drvdetail:"descr":"A tiny, portable, immediate-mode UI driver, details https://github.com/rxi/microui",
+	//drvdetail:"requires":"Any display graphic render driver. See drv_idisplay.h"}	
+	{ "MicroUI",                             // Driver Name
+	MicroUI_Init,                            // Init
+	MicroUI_OnEverySecond,                   // onEverySecond
+	MicroUI_AppendInformationToHTTPIndexPage,// appendInformationToHTTPIndexPage
+	MicroUI_QuickFrame,                                    // runQuickTick
+	MicroUI_Stop,                            // stopFunction
+	MicroUI_OnChannelChanged,                // onChannelChanged
+	NULL,                                    // onHassDiscovery
+	false,                                   // loaded
+	},
+#endif
 	//{ "", NULL, NULL, NULL, NULL, NULL, NULL, NULL, false },
 };
 

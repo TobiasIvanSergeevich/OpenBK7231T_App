@@ -3,6 +3,16 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "../hal_os_wrapper.h"
+#include "esp_system.h"
+
+
+/** @brief Get free heap size from OS
+  *
+  * @return    none
+  */
+uint32_t obk_get_free_heap_size( void ) {
+	return esp_get_minimum_free_heap_size();
+}
 
 /** @brief Enter a critical session, all interrupts are disabled
   *
@@ -10,7 +20,7 @@
   */
 void obk_enter_critical( void )
 {
-	
+	taskENTER_CRITICAL();
 }
 /** @brief Exit a critical session, all interrupts are enabled
   *
@@ -18,7 +28,7 @@ void obk_enter_critical( void )
   */
 void obk_exit_critical( void )
 {
-	
+	taskEXIT_CRITICAL();
 }
 /** @brief OS delay
   *

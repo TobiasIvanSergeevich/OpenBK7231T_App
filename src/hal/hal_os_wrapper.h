@@ -4,6 +4,13 @@
 typedef void * obk_mutex_t;
 #define OBK_WAITING_FOREVER 0
 
+/** @brief Get free heap size from OS
+  *
+  * @return    none
+  */
+uint32_t obk_get_free_heap_size( void );
+
+
 /** @brief Enter a critical session, all interrupts are disabled
   *
   * @return    none
