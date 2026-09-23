@@ -3,6 +3,8 @@
  * Event based stream parsing rewrite: Sakari Kapanen <sakari.m.kapanen@gmail.com>
  */
 
+
+#include "../new_common.h"
 #include "jsmn_stream.h"
 
 #include <stdbool.h>
