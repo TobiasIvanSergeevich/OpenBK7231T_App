@@ -1,4 +1,4 @@
-#if PLATFORM_ESP8266
+#ifdef WINDOWS
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -11,7 +11,7 @@
   * @return    none
   */
 uint32_t obk_get_free_heap_size( void ) {
-	return esp_get_minimum_free_heap_size();
+	return -1;
 }
 
 /** @brief Enter a critical session, all interrupts are disabled
@@ -20,7 +20,7 @@ uint32_t obk_get_free_heap_size( void ) {
   */
 void obk_enter_critical( void )
 {
-	taskENTER_CRITICAL();
+
 }
 /** @brief Exit a critical session, all interrupts are enabled
   *
@@ -28,20 +28,14 @@ void obk_enter_critical( void )
   */
 void obk_exit_critical( void )
 {
-	taskEXIT_CRITICAL();
+
 }
 /** @brief OS delay
   *
   * @return    none
   */
 void obk_delay_ms( uint32_t delay ) {	
-    uint32_t ticks;
 
-    ticks = delay / portTICK_PERIOD_MS;
-    if (ticks == 0)
-        ticks = 1;
-
-    vTaskDelay( (portTickType) ticks );
 }
 /** @defgroup OS Mutex Functions Wrappers
   * @brief Provide management APIs for Mutex such as init,lock,unlock and dinit.
@@ -61,8 +55,6 @@ void obk_delay_ms( uint32_t delay ) {
   */
 obk_err_t obk_init_mutex( obk_mutex_t* mutex )
 {
-	if (mutex != 0) return OBK_ERROR;
-	*(xSemaphoreHandle*) mutex = xSemaphoreCreateMutex();
 	return OBK_EOK;
 }
 /** @brief    Obtains the lock on a mutex
@@ -77,15 +69,8 @@ obk_err_t obk_init_mutex( obk_mutex_t* mutex )
   * @return   OBK_ERROR      : if an error occurred
   */
 obk_err_t obk_lock_mutex( obk_mutex_t* mutex, uint32_t timeout_ms)
-{	
-	TickType_t xTicksToWait = portMAX_DELAY;
-	if (timeout_ms != 0) {
-		xTicksToWait = timeout_ms / portTICK_PERIOD_MS;
-	}			
-    // Try lock mutex
-    if (xSemaphoreTake(*(xSemaphoreHandle*)mutex, timeout_ms) == pdTRUE) {
-		return OBK_EOK;
-	} else return OBK_ERROR;
+{
+	return OBK_EOK;
 }
 /** @brief    Releases the lock on a mutex
   *
@@ -99,8 +84,7 @@ obk_err_t obk_lock_mutex( obk_mutex_t* mutex, uint32_t timeout_ms)
   */
 obk_err_t obk_unlock_mutex( obk_mutex_t* mutex )
 {
-	xSemaphoreGive(*(xSemaphoreHandle*)mutex);
-	return OBK_EOK;
+	return OBK_EOK;	
 }
 
 

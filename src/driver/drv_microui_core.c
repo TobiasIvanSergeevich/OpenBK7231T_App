@@ -191,12 +191,12 @@ int8_t mu_init(mu_Context *ctx) {
 
 int8_t mu_deinit(mu_Context *ctx) {
 	if (ctx) {
-		if (ctx->command_list.items)    os_free(ctx->command_list.items);    ctx->command_list.items = NULL;
-		if (ctx->root_list.items)       os_free(ctx->root_list.items);       ctx->root_list.items = NULL;
-		if (ctx->container_stack.items) os_free(ctx->container_stack.items); ctx->container_stack.items = NULL;
-		if (ctx->clip_stack.items)      os_free(ctx->clip_stack.items);      ctx->clip_stack.items = NULL;
-		if (ctx->id_stack.items)        os_free(ctx->id_stack.items);        ctx->id_stack.items = NULL; 
-		if (ctx->layout_stack.items)    os_free(ctx->layout_stack.items);	 ctx->layout_stack.items = NULL;
+		if (ctx->command_list.items)    {os_free(ctx->command_list.items);   } ctx->command_list.items = NULL;
+		if (ctx->root_list.items)       {os_free(ctx->root_list.items);      } ctx->root_list.items = NULL;
+		if (ctx->container_stack.items) {os_free(ctx->container_stack.items);} ctx->container_stack.items = NULL;
+		if (ctx->clip_stack.items)      {os_free(ctx->clip_stack.items);     } ctx->clip_stack.items = NULL;
+		if (ctx->id_stack.items)        {os_free(ctx->id_stack.items);       } ctx->id_stack.items = NULL; 
+		if (ctx->layout_stack.items)    {os_free(ctx->layout_stack.items);	 } ctx->layout_stack.items = NULL;
 	}
 	return 0;
 }
