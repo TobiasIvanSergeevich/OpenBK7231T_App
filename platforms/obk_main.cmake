@@ -160,6 +160,7 @@ set(OBKM_SRC
 	${OBK_SRCS}driver/drv_uart.c
 	${OBK_SRCS}driver/drv_uart_tcp.c
 	${OBK_SRCS}driver/drv_ucs1912.c
+	${OBK_SRCS}driver/drv_vkl060.c
 	${OBK_SRCS}driver/drv_wemo.c
 	${OBK_SRCS}driver/drv_widget.c
 	${OBK_SRCS}driver/drv_spibus.c
