@@ -1,10 +1,6 @@
 #ifdef WINDOWS
 
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 #include "../hal_os_wrapper.h"
-#include "esp_system.h"
-
 
 /** @brief Get free heap size from OS
   *
