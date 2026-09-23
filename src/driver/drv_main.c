@@ -51,6 +51,54 @@ void GirierMCU_RunEverySecond();
 
 // startDriver BL0937
 static driver_t g_drivers[] = {
+#if ENABLE_DRIVER_SPIBUS	
+	//drvdetail:{"name":"HWSPI",
+	//drvdetail:"title":"TODO",
+	//drvdetail:"descr":"Hardware SPI driver.",
+	//drvdetail:"requires":""}	
+	{ "HWSPI",                               // Driver Name
+	HWSPI_Init,                              // Init
+	NULL,                                    // onEverySecond
+	NULL,                                    // appendInformationToHTTPIndexPage
+	NULL,                                    // runQuickTick
+	HWSPI_Stop,                              // stopFunction
+	NULL,                                    // onChannelChanged
+	NULL,                                    // onHassDiscovery
+	false,                                   // loaded
+	},
+#endif
+#if ENABLE_DRIVER_ST7789	
+	//drvdetail:{"name":"ST7789",
+	//drvdetail:"title":"TODO",
+	//drvdetail:"descr":"TFT display driver via SPI.",
+	//drvdetail:"requires":"HWSPI driver"}	
+	{ "ST7789",                               // Driver Name
+	st7789_Init,                              // Init
+	NULL,                                    // onEverySecond
+	st7789_AppendInformationToHTTPIndexPage,                                    // appendInformationToHTTPIndexPage
+	NULL,                                    // runQuickTick
+	st7789_Stop,                              // stopFunction
+	NULL,                                    // onChannelChanged
+	NULL,                                    // onHassDiscovery
+	false,                                   // loaded
+	},
+#endif
+#if ENABLE_DRIVER_MICROUI	
+	//drvdetail:{"name":"MicroUI",
+	//drvdetail:"title":"MicroUI",
+	//drvdetail:"descr":"A tiny, portable, immediate-mode UI driver, details https://github.com/rxi/microui",
+	//drvdetail:"requires":"Any display graphic render driver. See drv_idisplay.h"}	
+	{ "MicroUI",                             // Driver Name
+	MicroUI_Init,                            // Init
+	MicroUI_OnEverySecond,                   // onEverySecond
+	MicroUI_AppendInformationToHTTPIndexPage,// appendInformationToHTTPIndexPage
+	MicroUI_QuickFrame,                                    // runQuickTick
+	MicroUI_Stop,                            // stopFunction
+	MicroUI_OnChannelChanged,                // onChannelChanged
+	NULL,                                    // onHassDiscovery
+	false,                                   // loaded
+	},
+#endif
 #if ENABLE_DRIVER_TUYAMCU
 	//drvdetail:{"name":"TuyaMCU",
 	//drvdetail:"title":"TODO",
@@ -1616,54 +1664,6 @@ static driver_t g_drivers[] = {
 	DRV_MQTTServer_RunQuickTick,             // runQuickTick
 	DRV_MQTTServer_Stop,                     // stopFunction
 	NULL,                                    // onChannelChanged
-	NULL,                                    // onHassDiscovery
-	false,                                   // loaded
-	},
-#endif
-#if ENABLE_DRIVER_SPIBUS	
-	//drvdetail:{"name":"HWSPI",
-	//drvdetail:"title":"TODO",
-	//drvdetail:"descr":"Hardware SPI driver.",
-	//drvdetail:"requires":""}	
-	{ "HWSPI",                               // Driver Name
-	HWSPI_Init,                              // Init
-	NULL,                                    // onEverySecond
-	NULL,                                    // appendInformationToHTTPIndexPage
-	NULL,                                    // runQuickTick
-	HWSPI_Stop,                              // stopFunction
-	NULL,                                    // onChannelChanged
-	NULL,                                    // onHassDiscovery
-	false,                                   // loaded
-	},
-#endif
-#if ENABLE_DRIVER_ST7789	
-	//drvdetail:{"name":"ST7789",
-	//drvdetail:"title":"TODO",
-	//drvdetail:"descr":"TFT display driver via SPI.",
-	//drvdetail:"requires":"HWSPI driver"}	
-	{ "ST7789",                               // Driver Name
-	st7789_Init,                              // Init
-	NULL,                                    // onEverySecond
-	st7789_AppendInformationToHTTPIndexPage,                                    // appendInformationToHTTPIndexPage
-	NULL,                                    // runQuickTick
-	st7789_Stop,                              // stopFunction
-	NULL,                                    // onChannelChanged
-	NULL,                                    // onHassDiscovery
-	false,                                   // loaded
-	},
-#endif
-#if ENABLE_DRIVER_MICROUI	
-	//drvdetail:{"name":"MicroUI",
-	//drvdetail:"title":"MicroUI",
-	//drvdetail:"descr":"A tiny, portable, immediate-mode UI driver, details https://github.com/rxi/microui",
-	//drvdetail:"requires":"Any display graphic render driver. See drv_idisplay.h"}	
-	{ "MicroUI",                             // Driver Name
-	MicroUI_Init,                            // Init
-	MicroUI_OnEverySecond,                   // onEverySecond
-	MicroUI_AppendInformationToHTTPIndexPage,// appendInformationToHTTPIndexPage
-	MicroUI_QuickFrame,                                    // runQuickTick
-	MicroUI_Stop,                            // stopFunction
-	MicroUI_OnChannelChanged,                // onChannelChanged
 	NULL,                                    // onHassDiscovery
 	false,                                   // loaded
 	},
