@@ -290,7 +290,7 @@ void st7789_Init() {
 	
 	lcdInit(&tft);	
 	lcdDrawFillRect(&tft, 0, 0, tft.width-1, tft.height-1, BLACK);	
-	lcdDrawString(&tft, (tft.width>>1)-(3*14), (tft.height>>1)-13, "ST7789", BLUE, BLACK);
+	lcdDrawString(&tft, (tft.width>>1)-(3*14), (tft.height>>1)-13, (uint8_t *)"ST7789", BLUE, BLACK);
 	lcdDisplayOn(&tft);
 	lcdSetBrightness(&tft, 50);
 	//tft.font_scale = 1;
@@ -431,8 +431,8 @@ obk_err_t lcd_write_color(TFT_t * dev, uint16_t color, uint32_t size)
 	uint8_t xfer_buf[2];
 	//xfer_buf[0] = (color >> 8) & 0xFF;	
 	//xfer_buf[1] = color & 0xFF;
-	xfer_buf[0] = *(uint8_t*)(&color+0);
-	xfer_buf[1] = *(uint8_t*)(&color+1);
+	xfer_buf[0] = *(uint8_t*)(((uint8_t*)&color)+0);
+	xfer_buf[1] = *(uint8_t*)(((uint8_t*)&color)+1);
 	
 	HAL_PIN_SetOutputValue(dev->dc_pin, 1); /* data mode */
 	

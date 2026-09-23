@@ -315,7 +315,7 @@ obk_spi_message_t *obk_spi_transfer_message(obk_spidevice_t  *device,
 {
 	if (SPIBus_init != 1) {
 		addLogAdv(LOG_INFO, LOG_FEATURE_DRV, "HWSPI not started");	
-		return SPI_RES_ERROR;
+		return (obk_spi_message_t *)SPI_RES_ERROR;
 	}	
 	obk_err_t result;
     struct obk_spi_message *index;
