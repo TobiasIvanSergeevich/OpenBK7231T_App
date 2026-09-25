@@ -8,7 +8,7 @@
 #include "../logging/logging.h"
 #include "../littlefs/our_lfs.h"
 #include "../cJSON/cJSON.h"
-#include "../cJSON/jsmn_stream.h"
+#include "../jsmn/jsmn_stream.h"
 
 #include "drv_idisplay.h"
 #include "drv_microui.h"

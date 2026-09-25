@@ -45,6 +45,7 @@ set(OBKM_SRC
 	${OBK_SRCS}httpserver/rest_interface.c
 	${OBK_SRCS}mqtt/new_mqtt_deduper.c
 	${OBK_SRCS}jsmn/jsmn.c
+	${OBK_SRCS}jsmn/jsmn_stream.c
 	${OBK_SRCS}logging/logging.c
 	${OBK_SRCS}mqtt/new_mqtt.c
 	${OBK_SRCS}new_cfg.c
@@ -180,8 +181,7 @@ set(OBKM_SRC
 
 
 if(NOT DEFINED SDK_CJSON)
-	set(OBKM_SRC ${OBKM_SRC} ${OBK_SRCS}cJSON/cJSON.c)
-	set(OBKM_SRC ${OBKM_SRC} ${OBK_SRCS}cJSON/jsmn_stream.c)
+	set(OBKM_SRC ${OBKM_SRC} ${OBK_SRCS}cJSON/cJSON.c)	
 endif()
 
 if(NOT DEFINED SDK_LFS)
