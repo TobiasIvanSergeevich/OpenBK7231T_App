@@ -208,14 +208,45 @@ void HAL_FlashVars_SaveEnergy(ENERGY_DATA** data, int channel_count)
 	}
 }
 void HAL_FlashVars_GetEnergy(ENERGY_DATA* data, ENERGY_CHANNEL channel)
-{
+{	
 	if(data != NULL)
 	{
+		InitEasyFlashIfNeeded();
 		char buffer[20];
 		sprintf(buffer, "HLW_CH%i", channel);
 		ef_get_env_blob(buffer, data, sizeof(ENERGY_DATA), NULL);
 	}
 }
 //#endif
+/**/
+void HAL_FlashVars_SaveEnergy_BLv2(ENERGY_METERING_DATA_V2* data, int meter) {
+	if(data != NULL)
+	{
+		InitEasyFlashIfNeeded();
+		EfErrCode res;
+		char buffer[20];
+		sprintf(buffer, "ENRG_M%i", meter);
+		res = ef_set_env_blob(buffer, data, sizeof(ENERGY_METERING_DATA_V2));
+		if(res == EF_ENV_INIT_FAILED) {
+			ADDLOG_DEBUG(LOG_FEATURE_CFG, "%s: init failed for %d b", __func__, sizeof(ENERGY_METERING_DATA_V2));
+			return;
+		}
+		if(res == EF_ENV_NAME_ERR) {
+			ADDLOG_DEBUG(LOG_FEATURE_CFG, "%s: name err for %d b", __func__, sizeof(ENERGY_METERING_DATA_V2));
+			return;
+		}
+		ADDLOG_DEBUG(LOG_FEATURE_CFG, "%s: saved %d b", __func__, sizeof(ENERGY_METERING_DATA_V2));
+	}	
+}	
+/**/
+void HAL_FlashVars_GetEnergy_BLv2(ENERGY_METERING_DATA_V2* data, int meter) {
+	if(data != NULL)
+	{
+		char buffer[20];
+		sprintf(buffer, "ENRG_M%i", meter);
+		int readLen = ef_get_env_blob(buffer, data, sizeof(ENERGY_METERING_DATA_V2), NULL);		 
+		ADDLOG_DEBUG(LOG_FEATURE_CFG, "%s: read %d b", __func__, readLen);
+	}	
+}
 
 #endif

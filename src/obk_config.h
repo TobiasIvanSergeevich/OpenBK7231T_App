@@ -299,6 +299,7 @@
 #define ENABLE_DRIVER_BL0942					1
 #define ENABLE_DRIVER_BL0942SPI					1
 #define ENABLE_DRIVER_CSE7766					1
+#define ENABLE_DRIVER_ATMS100133				1
 // #define ENABLE_DRIVER_BMP280					1
 // #define ENABLE_DRIVER_PT6523					1
 // #define ENABLE_DRIVER_MAX6675				1
@@ -811,12 +812,31 @@
 #endif
 
 // if power metering chip is enabled, also enable backend for that
-#if ENABLE_DRIVER_BL0937 || ENABLE_DRIVER_BL0942 || ENABLE_DRIVER_BL0942SPI || ENABLE_DRIVER_CSE7766
+#if ENABLE_DRIVER_BL0937 || ENABLE_DRIVER_BL0942 || ENABLE_DRIVER_BL0942SPI || ENABLE_DRIVER_CSE7766 
 #define ENABLE_BL_SHARED						1
 // allow use two BL0942 on two ports  +940 bytes
 // #define ENABLE_BL_TWIN						1
 // allow moving average energy calculation +180 bytes
 // #define ENABLE_BL_MOVINGAVG					1
+#endif
+// if power metering chip is enabled, also enable backend for that
+#if ENABLE_DRIVER_ATMS100133
+	#define ENABLE_BLv2_SHARED					1
+	#ifdef ENABLE_BL_SHARED
+		#undef ENABLE_BL_SHARED
+	#endif	
+#endif
+
+#if ENABLE_BLv2_SHARED
+// allow moving average energy calculation +180 bytes
+// #define ENABLE_BL_MOVINGAVG					1
+// alow bidirectional (import/export) energy metering
+	#define ENABLED_BIDIRECTIONAL_ENERGY        1	
+// allow tarifed energy
+	#define ENABLED_TARIFED_ENERGY              1	
+	#define TARIFED_TIMEZONE_MAX 				2
+// allow month energy	
+	#define ENABLED_MONTH_ENERGY                1
 #endif
 
 // ensure that there would be no conflicts

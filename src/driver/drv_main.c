@@ -4,6 +4,7 @@
 #include "drv_bl0942.h"
 #include "drv_bl0939.h"
 #include "drv_bl_shared.h"
+#include "drv_bl_shared_v2.h"
 #include "drv_neo6m.h"
 #include "drv_cse7766.h"
 #include "drv_ir.h"
@@ -1080,7 +1081,7 @@ static driver_t g_drivers[] = {
 	false,                                   // loaded
 	},
 	//drvdetail:{"name":"BP5758D",
-	//drvdetail:"title":"TODO",	
+	//drvdetail:"title":"TODO",
 	//drvdetail:"descr":"BP5758D custom-'I2C' LED driver for RGBCW lights. This will start automatically if you set both BP5758D pin roles. This may need you to remap the RGBCW indexes with BP5758D_Map command. This driver is used in some of BL602/Sonoff bulbs, see [video flashing tutorial here](https://www.youtube.com/watch?v=L6d42IMGhHw)",
 	//drvdetail:"requires":""}
 	{ "BP5758D",                             // Driver Name
@@ -1657,6 +1658,22 @@ static driver_t g_drivers[] = {
 	false,                                   // loaded
 	}
 #endif
+#if ENABLE_DRIVER_ATMS100133
+	//drvdetail:{"name":"ATMS",
+	//drvdetail:"title":"TODO",
+	//drvdetail:"descr":"ATMS100133 is a 3-phase energy meter with power-meter functions. Contents three BL0942, connected to MCU. Wifi-module read data with TuyaMCU protocal.",
+	//drvdetail:"requires":"TuyaMCU"}
+	{ "ATMS100133",                              // Driver Name
+	ATMS_Init,                               // Init
+	ATMS_RunEverySecond,                     // onEverySecond
+	ATMS_AppendInformationToHTTPIndexPage,   // appendInformationToHTTPIndexPage
+	ATMS_runQuickTick,                       // runQuickTick
+	NULL,                                    // stopFunction
+	NULL,                                    // onChannelChanged
+	NULL,                                    // onHassDiscovery
+	false,                                   // loaded
+	},
+#endif
 	//{ "", NULL, NULL, NULL, NULL, NULL, NULL, NULL, false },
 };
 
@@ -1955,7 +1972,8 @@ bool DRV_IsMeasuringPower() {
 #ifndef OBK_DISABLE_ALL_DRIVERS
 	return DRV_IsRunning("BL0937") || DRV_IsRunning("BL0942")
 		|| DRV_IsRunning("CSE7766") || DRV_IsRunning("TESTPOWER")
-		|| DRV_IsRunning("BL0942SPI") || DRV_IsRunning("RN8209");
+		|| DRV_IsRunning("BL0942SPI") || DRV_IsRunning("RN8209")
+		|| DRV_IsRunning("ATMS100133");
 		// || DRV_IsRunning("HLW8112SPI"); TODO messup ha config if enabled
 #else
 	return false;

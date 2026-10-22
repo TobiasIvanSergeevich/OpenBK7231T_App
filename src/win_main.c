@@ -240,7 +240,7 @@ void Win_DoUnitTests()
 	Test_DoorSensor();
 	Test_Command_If_Else();
 	Test_ChargeLimitDriver();
-#if ENABLE_BL_SHARED
+#if ENABLE_BL_SHARED || ENABLE_BLv2_SHARED
 	Test_EnergyMeter();
 #endif
 	Test_TuyaMCU_Calib();

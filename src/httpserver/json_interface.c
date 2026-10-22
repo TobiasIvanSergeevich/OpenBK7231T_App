@@ -21,6 +21,7 @@
 #include "../driver/drv_deviceclock.h"
 #include "../driver/drv_local.h"
 #include "../driver/drv_bl_shared.h"
+#include "../driver/drv_bl_shared_v2.h"
 #include "../driver/drv_ds1820_simple.h"
 #include "../driver/drv_ds1820_full.h"
 
@@ -205,7 +206,7 @@ static int http_tasmota_json_power(void* request, jsonCb_t printer) {
 /*
 {"StatusSNS":{"Time":"2022-07-30T10:11:26","ENERGY":{"TotalStartTime":"2022-05-12T10:56:31","Total":0.003,"Yesterday":0.003,"Today":0.000,"Power": 0,"ApparentPower": 0,"ReactivePower": 0,"Factor":0.00,"Voltage":236,"Current":0.000}}}
 */
-#ifdef ENABLE_DRIVER_BL0937
+#if ENABLE_BL_SHARED || ENABLE_BLv2_SHARED
 // returns NaN values as 0
 static float _getReading_NanToZero(energySensor_t type) {
 	float retval = DRV_GetReading(type);
@@ -243,7 +244,7 @@ static int http_tasmota_json_ENERGY(void* request, jsonCb_t printer) {
 	}
 	return 0;
 }
-#endif	// ENABLE_DRIVER_BL0937
+#endif	// ENABLE_BL_SHARED || ENABLE_BLv2_SHARED
 // Topic: tele/tasmota_48E7F3/SENSOR at 3:06 AM:
 // Sample:
 /*

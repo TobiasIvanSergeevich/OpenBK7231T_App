@@ -50,7 +50,7 @@ void hass_populate_unique_id(ENTITY_TYPE type, int index, char* uniq_id, int ase
 	case LIGHT_RGBCW:
 		sprintf(uniq_id, "%s_%s", longDeviceName, "light");
 		break;
-		
+
 	case HASS_FAN:
 		sprintf(uniq_id, "%s_fan", longDeviceName);
 		break;
@@ -62,7 +62,7 @@ void hass_populate_unique_id(ENTITY_TYPE type, int index, char* uniq_id, int ase
 		break;
 
 	case ENERGY_METER_SENSOR:
-#ifdef ENABLE_DRIVER_BL0937
+#if ENABLE_BL_SHARED || ENABLE_BLv2_SHARED
 		sprintf(uniq_id, "%s_sensor_%s", longDeviceName, DRV_GetEnergySensorNamesEx(asensdatasetix,index)->hass_uniq_id_suffix);
 #endif
 		break;
@@ -225,7 +225,7 @@ void hass_populate_device_config_channel(ENTITY_TYPE type, char* uniq_id, HassDe
 }
 
 /// @brief Builds HomeAssistant device discovery info. The caller needs to free the returned pointer.
-/// @param ids 
+/// @param ids
 cJSON* hass_build_device_node(cJSON* ids) {
 	cJSON* dev = cJSON_CreateObject();
 	cJSON_AddItemToObject(dev, "ids", ids);     //identifiers
@@ -349,7 +349,7 @@ HassDeviceInfo* hass_createGarageEntity(const char* state_topic, const char* com
 	// publish [Topic] [Value]
 	// publish 1 open
 	// publish 1 closed
-	// publish 1 opening  
+	// publish 1 opening
 	// obk0696FB33/[Topic]/get
 	cJSON_AddStringToObject(info->root, "payload_open", "OPEN");
 	cJSON_AddStringToObject(info->root, "payload_close", "CLOSE");
@@ -522,14 +522,14 @@ HassDeviceInfo* hass_createShutter(int index) {
 }
 
 /// @brief Initializes HomeAssistant device discovery storage with common values.
-/// @param type 
-/// @param index This is used to generate generate unique_id and name. 
+/// @param type
+/// @param index This is used to generate generate unique_id and name.
 /// It is ignored for RGB and diagnostic sensors (HASS_RSSI, HASS_UPTIME, HASS_BUILD...).
 /// For energy sensors, index corresponds to energySensor_t. For regular sensor, index can be be the channel.
 /// @param payload_on The payload that represents enabled state. This is not added for POWER_SENSOR.
 /// @param payload_off The payload that represents disabled state. This is not added for POWER_SENSOR.
 /// @param asensdatasetix dataset index for ENERGY_METER_SENSOR, otherwise 0
-/// @return 
+/// @return
 HassDeviceInfo* hass_init_device_info(ENTITY_TYPE type, int index, const char* payload_on, const char* payload_off, int asensdatasetix, const char *title) {
 	HassDeviceInfo* info = os_malloc(sizeof(HassDeviceInfo));
 	addLogAdv(LOG_DEBUG, LOG_FEATURE_HASS, "hass_init_device_info=%p", info);
@@ -567,7 +567,7 @@ HassDeviceInfo* hass_init_device_info(ENTITY_TYPE type, int index, const char* p
 			break;
 		case ENERGY_METER_SENSOR:
 			isSensor = true;
-	#ifdef ENABLE_DRIVER_BL0937
+	#if ENABLE_BL_SHARED || ENABLE_BLv2_SHARED
 			if (index <= OBK__LAST)
 				sprintf(g_hassBuffer, "%s", DRV_GetEnergySensorNamesEx(asensdatasetix, index)->name_friendly);
 			else
@@ -635,7 +635,7 @@ HassDeviceInfo* hass_init_device_info(ENTITY_TYPE type, int index, const char* p
 			break;
 		case HASS_IP:
 			sprintf(g_hassBuffer, "IP");
-			break; 
+			break;
 		case HASS_GARAGE:
 			sprintf(g_hassBuffer, "Garage");
 			break;
@@ -656,7 +656,7 @@ HassDeviceInfo* hass_init_device_info(ENTITY_TYPE type, int index, const char* p
 		}
 	}
 	if (title) {
-		if (type!=HASS_BUTTON) 
+		if (type!=HASS_BUTTON)
 			strcat(g_hassBuffer, "_");
 		strcat(g_hassBuffer, title);
 	}
@@ -675,13 +675,13 @@ HassDeviceInfo* hass_init_device_info(ENTITY_TYPE type, int index, const char* p
 		}
 	}
 
-	if (!isSensor && type != HASS_TEXTFIELD && type != HASS_GARAGE) {	//Sensors (except binary_sensor) don't use payload 
+	if (!isSensor && type != HASS_TEXTFIELD && type != HASS_GARAGE) {	//Sensors (except binary_sensor) don't use payload
 		if(type == HASS_BUTTON) {
 			cJSON_AddStringToObject(info->root, "payload_press", payload_on);
 		}
 		else if(type != HASS_TEXTFIELD){
 			cJSON_AddStringToObject(info->root, "pl_on", payload_on);    //payload_on
-			cJSON_AddStringToObject(info->root, "pl_off", payload_off);   //payload_off	
+			cJSON_AddStringToObject(info->root, "pl_off", payload_off);   //payload_off
 		}
 	}
 
@@ -746,7 +746,7 @@ HassDeviceInfo* hass_createToggle(const char *label, const char *stateTopic, con
 
 /// @brief Initializes HomeAssistant relay device discovery storage.
 /// @param index
-/// @return 
+/// @return
 HassDeviceInfo* hass_init_relay_device_info(int index, ENTITY_TYPE type, bool bToggleInv) {
 	HassDeviceInfo* info;
 	if (bToggleInv) {
@@ -766,8 +766,8 @@ HassDeviceInfo* hass_init_relay_device_info(int index, ENTITY_TYPE type, bool bT
 
 #if ENABLE_LED_BASIC
 /// @brief Initializes HomeAssistant light device discovery storage.
-/// @param type 
-/// @return 
+/// @param type
+/// @return
 HassDeviceInfo* hass_init_light_device_info(ENTITY_TYPE type) {
 	const char* clientId = CFG_GetMQTTClientId();
 	HassDeviceInfo* info = NULL;
@@ -796,8 +796,8 @@ HassDeviceInfo* hass_init_light_device_info(ENTITY_TYPE type) {
 	case LIGHT_PWMCW:
 		brightness_scale = 100;
 
-		//Using `last` (the default) will send any style (brightness, color, etc) topics first and then a payload_on to the command_topic. 
-		//Using `first` will send the payload_on and then any style topics. 
+		//Using `last` (the default) will send any style (brightness, color, etc) topics first and then a payload_on to the command_topic.
+		//Using `first` will send the payload_on and then any style topics.
 		//Using `brightness` will only send brightness commands instead of the payload_on to turn the light on.
 		cJSON_AddStringToObject(info->root, "on_cmd_type", "first");	//on_command_type
 		break;
@@ -879,11 +879,11 @@ HassDeviceInfo* hass_init_binary_sensor_device_info(int index, bool bInverse) {
 	return info;
 }
 
-#ifdef ENABLE_DRIVER_BL0937
+#if ENABLE_BL_SHARED || ENABLE_BLv2_SHARED
 
 /// @brief Initializes HomeAssistant power sensor device discovery storage.
 /// @param index Index corresponding to energySensor_t.
-/// @return 
+/// @return
 HassDeviceInfo* hass_init_energy_sensor_device_info(int index, int asensdatasetix) {
 	HassDeviceInfo* info = 0;
 
@@ -912,15 +912,15 @@ HassDeviceInfo* hass_init_energy_sensor_device_info(int index, int asensdataseti
 		cJSON_AddStringToObject(info->root, "unit_of_meas", CFG_HasFlag(OBK_FLAG_MQTT_ENERGY_IN_KWH) ? "kWh" : "Wh");
 	} else {
 		//20241024 XJIKKA skip measurement for timestamp - HASS log:
-		//HASS:	energy_clear_date (<class 'homeassistant.components.mqtt.sensor.MqttSensor'>) is using state class 'measurement' 
-		//		which is impossible considering device class ('timestamp') it is using; expected None; 
+		//HASS:	energy_clear_date (<class 'homeassistant.components.mqtt.sensor.MqttSensor'>) is using state class 'measurement'
+		//		which is impossible considering device class ('timestamp') it is using; expected None;
 		if (strcmp(DRV_GetEnergySensorNamesEx(asensdatasetix, index)->hass_dev_class,"timestamp")) {
 			cJSON_AddStringToObject(info->root, "stat_cla", "measurement");
 		}
 		//20241024 XJIKKA if unit is not set (drv_bl_shared.c @ "power_factor"), mqtt value unit_of_meas was empty - HASS log:
-		//HASS:	sensor...power_factor is using native unit of measurement '' which is not a valid unit 
-		//		for the device class ('power_factor') it is using; expected one of ['no unit of measurement', '%']; 
-		//solution is to skip empty 
+		//HASS:	sensor...power_factor is using native unit of measurement '' which is not a valid unit
+		//		for the device class ('power_factor') it is using; expected one of ['no unit of measurement', '%'];
+		//solution is to skip empty
 		if (strlen(DRV_GetEnergySensorNamesEx(asensdatasetix, index)->units)>0) {
 			cJSON_AddStringToObject(info->root, "unit_of_meas", DRV_GetEnergySensorNames(index)->units);
 		}
@@ -975,7 +975,7 @@ char *hass_generate_multiplyAndRound_template(int decimalPlacesForRounding, int 
 HassDeviceInfo* hass_init_light_singleColor_onChannels(int toggle, int dimmer, int brightness_scale) {
 	HassDeviceInfo*dev_info;
 	const char* clientId;
-	
+
 	clientId = CFG_GetMQTTClientId();
 	dev_info = hass_init_device_info(LIGHT_PWM, toggle, "1", "0", 0, NULL);
 
@@ -996,7 +996,7 @@ HassDeviceInfo* hass_init_light_singleColor_onChannels(int toggle, int dimmer, i
 /// @brief Initializes HomeAssistant sensor device discovery storage.
 /// @param type
 /// @param channel
-/// @return 
+/// @return
 HassDeviceInfo* hass_init_sensor_device_info(ENTITY_TYPE type, int channel, int decPlaces, int decOffset, int divider) {
 	//Assuming that there is only one DHT setup per device which keeps uniqueid/names simpler
 	HassDeviceInfo* info = hass_init_device_info(type, channel, NULL, NULL, 0, NULL);	//using channel as index to generate uniqueId
@@ -1051,7 +1051,7 @@ HassDeviceInfo* hass_init_sensor_device_info(ENTITY_TYPE type, int channel, int 
 		cJSON_AddStringToObject(info->root, "unit_of_meas", "ppm");
 		sprintf(g_hassBuffer, "~/%d/get", channel);
 		cJSON_AddStringToObject(info->root, "stat_t", g_hassBuffer);
-		break; 
+		break;
 	case PRESSURE_SENSOR:
 		cJSON_AddStringToObject(info->root, "dev_cla", "pressure");
 		cJSON_AddStringToObject(info->root, "unit_of_meas", "hPa");
@@ -1206,8 +1206,8 @@ HassDeviceInfo* hass_init_sensor_device_info(ENTITY_TYPE type, int channel, int 
 }
 
 /// @brief Returns the discovery JSON.
-/// @param info 
-/// @return 
+/// @param info
+/// @return
 const char* hass_build_discovery_json(HassDeviceInfo* info) {
 	if (info == NULL) {
 		addLogAdv(LOG_ERROR, LOG_FEATURE_HASS, "ERROR: someone passed NULL pointer to hass_build_discovery_json");
@@ -1222,7 +1222,7 @@ const char* hass_build_discovery_json(HassDeviceInfo* info) {
 }
 
 /// @brief Release allocated memory.
-/// @param info 
+/// @param info
 void hass_free_device_info(HassDeviceInfo* info) {
 	if (info == NULL)
 		return;

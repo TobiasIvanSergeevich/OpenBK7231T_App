@@ -212,6 +212,7 @@ static bool heartbeat_valid = false;
 static int heartbeat_timer = 0;
 static int heartbeat_counter = 0;
 static bool product_information_valid = false;
+static cJSON *product_information = NULL;
 // ?? it's unused atm
 //static char *prod_info = NULL;
 static bool working_mode_valid = false;
@@ -261,6 +262,8 @@ typedef struct tuyaMCUPacket_s {
 
 tuyaMCUPacket_t *tm_emptyPackets = 0;
 tuyaMCUPacket_t *tm_sendPackets = 0;
+
+dpParser_t g_dpParser = NULL;
 
 tuyaMCUPacket_t *TUYAMCU_AddToQueue(int len) {
 	tuyaMCUPacket_t *toUse;
@@ -1273,6 +1276,10 @@ void TuyaMCU_ParseQueryProductInformation(const byte* data, int len) {
 	char name[256];
 	int useLen;
 
+	if (product_information)
+		cJSON_Delete(product_information);
+	product_information = cJSON_ParseWithLength((const char *)data, len);
+	
 	useLen = len - 1;
 	if (useLen > sizeof(name) - 1)
 		useLen = sizeof(name) - 1;
@@ -1659,6 +1666,14 @@ void TuyaMCU_ParseStateMessage(const byte* data, int len) {
 		mapping = TuyaMCU_FindDefForID(dpId);
 		if (mapping && mapping->dpType == DP_TYPE_PUBLISH_TO_MQTT) {
 			TuyaMCU_PublishDPToMQTT(data, ofs);
+		}
+		
+		if (g_dpParser) {
+			int dpSize = data[ofs + 2] << 8 | data[ofs + 3];
+			int dpId = data[ofs];
+			int dpType = data[ofs + 1];
+			byte *payload = data + (ofs + 4);
+			g_dpParser(dpId, dpType, dpSize, payload);
 		}
 
 #if ENABLE_OBK_BERRY
@@ -2705,6 +2720,9 @@ bool TuyaMCU_IsLEDRunning() {
 	return true;
 }
 void TuyaMCU_Shutdown() {
+	if (product_information)
+		cJSON_Delete(product_information);
+
 	tuyaMCUMapping_t *tmp, *nxt;
 	tuyaMCUPacket_t *packet, *next_packet;
 
@@ -2884,7 +2902,14 @@ void TuyaMCU_Init()
 	CMD_RegisterCommand("tuyaMcu_batteryPoweredMode", Cmd_TuyaMCU_BatteryPoweredMode, NULL);
 }
 
+void TuyaMCU_Set_dpParser(dpParser_t dpParser_func)
+{	
+	g_dpParser = dpParser_func;
+}
 
+cJSON *TuyaMCU_GetProductInformation(void) {
+	return product_information;
+}
 
 // Door sensor with TuyaMCU version 0 (not 3), so all replies have x00 and not 0x03 byte
 // fakeTuyaPacket 55AA0008000C00010101010101030400010223

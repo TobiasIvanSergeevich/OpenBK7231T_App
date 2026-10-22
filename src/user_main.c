@@ -11,6 +11,7 @@
 //#include "driver/drv_ir.h"
 #include "driver/drv_public.h"
 #include "driver/drv_bl_shared.h"
+#include "driver/drv_bl_shared_v2.h"
 //#include "ir/ir_local.h"
 
 #include "driver/drv_deviceclock.h"
@@ -205,8 +206,8 @@ static int get_tsen_adc(
 	float *temp,      //  Pointer to float to store the temperature
 	uint8_t log_flag  //  0 to disable logging, 1 to enable logging
 ) {
-	
-	
+
+
 	//  Return the temperature
 	*temp = hosal_adc_tsen_value_get_f(hosal_adc_device_get());
 	return 0;
@@ -455,14 +456,14 @@ static int g_SSIDSwitchCnt = 0;     // switch counter
 
 void CheckForSSID12_Switch() {
 #if ALLOW_SSID2
-	// nothing to do if SSID2 is unset 
+	// nothing to do if SSID2 is unset
 	if (CFG_GetWiFiSSID2()[0] == 0) return;
 	if (g_SSIDSwitchCnt++ < g_SSIDSwitchAfterTry) {
 		ADDLOGF_INFO("WiFi SSID: waiting for SSID switch %d/%d (using SSID%d)", g_SSIDSwitchCnt, g_SSIDSwitchAfterTry, g_SSIDactual+1);
 		return;
 	}
 	g_SSIDSwitchCnt = 0;
-	g_SSIDactual ^= 1;	// toggle SSID 
+	g_SSIDactual ^= 1;	// toggle SSID
 	ADDLOGF_INFO("WiFi SSID: switching to SSID%i", g_SSIDactual + 1);
 	if(CFG_HasFlag(OBK_FLAG_WIFI_ENHANCED_FAST_CONNECT)) HAL_DisableEnhancedFastConnect();
 #endif
@@ -549,7 +550,7 @@ void Main_OnWiFiStatusChange(int code)
 	case WIFI_STA_CONNECTED:
 #if ALLOW_SSID2
 		if (!g_bHasWiFiConnected) FV_UpdateStartupSSIDIfChanged_StoredValue(g_SSIDactual);	//update ony on first connect
-#endif		
+#endif
 
 		g_bHasWiFiConnected = 1;
 		ADDLOGF_INFO("%s - WIFI_STA_CONNECTED - %i", __func__, code);
@@ -566,7 +567,7 @@ void Main_OnWiFiStatusChange(int code)
 			if (strlen(CFG_DeviceGroups_GetName()) > 0) {
 				ScheduleDriverStart("DGR", 5);
 			}
-			// if SSDP should be active, 
+			// if SSDP should be active,
 			// restart it now.
 			if (DRV_SSDP_Active) {
 				ScheduleDriverStart("SSDP", 5);
@@ -677,7 +678,7 @@ void Main_LogPowerSave() {
 #endif
 
 /// @brief Schedule HomeAssistant discovery. The caller should check OBK_FLAG_AUTOMAIC_HASS_DISCOVERY if necessary.
-/// @param seconds 
+/// @param seconds
 #if ENABLE_HA_DISCOVERY
 void Main_ScheduleHomeAssistantDiscovery(int seconds) {
 	g_doHomeAssistantDiscoveryIn = seconds;
@@ -692,8 +693,8 @@ void Main_ConnectToWiFiNow() {
 	CheckForSSID12_Switch();
 	wifi_ssid = CFG_GetWiFiSSIDX();
 	wifi_pass = CFG_GetWiFiPassX();
-	// register function to get callbacks about wifi changes .. 
-	// ... but do it, before calling HAL_ConnectToWiFi(), 
+	// register function to get callbacks about wifi changes ..
+	// ... but do it, before calling HAL_ConnectToWiFi(),
 	// otherwise callbacks are not possible (e.g. WIFI_STA_CONNECTING can never be called )!!
 	HAL_WiFi_SetupStatusCallback(Main_OnWiFiStatusChange);
 	ADDLOGF_INFO("Registered for wifi changes");
@@ -739,9 +740,9 @@ static byte g_secondsSpentInLowMemoryWarning = 0;
 void Main_OnEverySecond()
 {
 #if PLATFORM_W600 || PLATFORM_W800
-#define TimeOut_t xTimeOutType 
+#define TimeOut_t xTimeOutType
 #endif
-#if ! ( WINDOWS || PLATFORM_TXW81X  || PLATFORM_RDA5981) 
+#if ! ( WINDOWS || PLATFORM_TXW81X  || PLATFORM_RDA5981)
 	TimeOut_t myTimeout;	// to get uptime from xTicks - not working on WINDOWS and TXW81X and RDA5981
 #endif
 	int newMQTTState;
@@ -1078,12 +1079,12 @@ void Main_OnEverySecond()
 		if (!g_reset) {
 			// ensure any config changes are saved before reboot.
 			CFG_Save_IfThereArePendingChanges();
-#if ENABLE_BL_SHARED
+#if ENABLE_BL_SHARED || ENABLE_BLv2_SHARED
 			if (DRV_IsMeasuringPower())
 			{
 				BL09XX_SaveEmeteringStatistics();
 			}
-#endif       
+#endif
 			DRV_SavePowerMeterDriverStatistics();
 			ADDLOGF_INFO("Rebooting...");
 			// call disconnect so that fast connect wouldn't fail
@@ -1323,7 +1324,7 @@ void Main_Init_AfterDelay_Unsafe(bool bStartAutoRunScripts) {
 			DRV_StartDriver("IR");
 			//ScheduleDriverStart("IR",5);
 #elif ENABLE_DRIVER_TINYIR_NEC
-			if(PIN_FindPinIndexForRole(IOR_IRSend, -1) == -1) 
+			if(PIN_FindPinIndexForRole(IOR_IRSend, -1) == -1)
 				DRV_StartDriver("TinyIR_NEC");
 #endif
 #endif
@@ -1639,12 +1640,12 @@ void Main_Init_After_Delay()
 
 #if MQTT_USE_TLS
 	if (!CFG_GetDisableWebServer() || bSafeMode) {
-#endif		
+#endif
 		HTTPServer_Start();
 		ADDLOGF_DEBUG("Started http tcp server");
 #if MQTT_USE_TLS
-	} 
-#endif		
+	}
+#endif
 
 	// only initialise certain things if we are not in AP mode
 	if (!bSafeMode)
