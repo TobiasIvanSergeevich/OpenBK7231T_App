@@ -5,6 +5,8 @@
 
 #if ENABLE_BLv2_SHARED
 
+#include "math.h"
+
 typedef enum energySensorMode_e {
 	es_1PhaseMode = 0,
 	es_3PhaseMode,
@@ -32,6 +34,7 @@ void BLv2_ProcessUpdateMesuaments(int meter, float voltage, float current, float
 //void BLv2_ProcessUpdate(int meter, float voltage, float current, float power, float frequency, float energyWh);
 void BLv2_AppendInformationToHTTPIndexPage(http_request_t *request, int bPreState);
 void BLv2_SaveEmeteringStatistics();
+void BLv2_ResetRecivedDataBool();
 
 /* for compatable */
 static inline void BL09XX_SaveEmeteringStatistics(void) {
@@ -39,6 +42,17 @@ static inline void BL09XX_SaveEmeteringStatistics(void) {
 }
 static inline void BL09XX_AppendInformationToHTTPIndexPage(http_request_t *request, int bPreState) {
  	BLv2_AppendInformationToHTTPIndexPage(request, bPreState);
+}
+static inline void BL_ProcessUpdate(float voltage, float current, float power, float frequency, float energyWh) {
+	BLv2_ProcessUpdateMesuaments(0, voltage, current, power, NAN, NAN, NAN, frequency, 0);
+	BLv2_ProcessUpdateEnergy(0, energyWh, NAN, NAN, NAN, 0);
+}
+static inline void BL_ProcessUpdateEx(int adeviceindex, float voltage, float current, float power, float frequency, float energyWh) {
+	BLv2_ProcessUpdateMesuaments(adeviceindex, voltage, current, power, NAN, NAN, NAN, frequency, 0);
+	BLv2_ProcessUpdateEnergy(adeviceindex, energyWh, NAN, NAN, NAN, 0);
+}
+static inline void BL_ResetRecivedDataBool(void){
+	BLv2_ResetRecivedDataBool();
 }
 
 #define BL_SENSORS_IX_0 0

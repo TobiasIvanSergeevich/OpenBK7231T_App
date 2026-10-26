@@ -1019,7 +1019,7 @@ void BLv2_ProcessUpdateMesuaments(int meter, float voltage, float current, float
 	char datetime[64];
 	portTickType nowTickCount = xTaskGetTickCount();
 	energysensdataset_t* sensdataset = &blv2_energy_meter.datasetlist[meter];
-		// I had reports that BL0942 sometimes gives
+	// I had reports that BL0942 sometimes gives
 	// a large, negative peak of current/power
 	if (!CFG_HasFlag(OBK_FLAG_POWER_ALLOW_NEGATIVE)) {
 		if (!isnan(voltage) && (voltage < 0.0f)) 	voltage = 0.0f;
@@ -1089,7 +1089,7 @@ void BLv2_ProcessUpdateMesuaments(int meter, float voltage, float current, float
 	if ((blv2_energy_meter.measuredsensors&msVoltage) && !isnan(voltage) && voltage_lastReading) *voltage_lastReading = (double)voltage;
 	if ((blv2_energy_meter.measuredsensors&msCurrent) && !isnan(current) && curent_lastReading) *curent_lastReading = (double)current;
 	if (!isnan(power_active)) {
-		if (((line) && (blv2_energy_meter.measuredsensors&msPowerActiveSumm)) || ((!line) && (blv2_energy_meter.measuredsensors&msPowerActivePhase))) {
+		if (((!line) && (blv2_energy_meter.measuredsensors&msPowerActiveSumm)) || ((line) && (blv2_energy_meter.measuredsensors&msPowerActivePhase))) {
 			if (power_active_lastReading) *power_active_lastReading = (double)power_active;
 		}
 	}

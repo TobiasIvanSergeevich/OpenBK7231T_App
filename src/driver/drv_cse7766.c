@@ -9,7 +9,11 @@
 
 #include "../logging/logging.h"
 #include "../new_pins.h"
-#include "drv_bl_shared.h"
+#ifdef ENABLE_BLv2_SHARED
+	#include "drv_bl_shared_v2.h"
+#else
+	#include "drv_bl_shared.h"
+#endif
 #include "drv_pwrCal.h"
 #include "drv_uart.h"
 
@@ -207,7 +211,11 @@ int CSE7766_TryToGetNextCSE7766Packet() {
 }
 
 void CSE7766_Init(void) {
-    BL_Shared_Init();
+#ifdef ENABLE_BLv2_SHARED
+	BLv2_Shared_Init(1, es_1PhaseMode, msVoltage|msCurrent|msPowerActiveSumm);
+#else
+	BL_Shared_Init();
+#endif
 
     PwrCal_Init(PWR_CAL_MULTIPLY, DEFAULT_VOLTAGE_CAL, DEFAULT_CURRENT_CAL,
                 DEFAULT_POWER_CAL);

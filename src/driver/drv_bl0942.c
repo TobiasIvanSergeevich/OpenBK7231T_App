@@ -1,9 +1,7 @@
 #include "drv_bl0942.h"
 #include "../obk_config.h"
 
-
-
-#if ENABLE_DRIVER_BL0942 
+#if ENABLE_DRIVER_BL0942
 
 #include <math.h>
 #include <stdint.h>
@@ -12,7 +10,11 @@
 #include "../new_cfg.h"
 #include "../new_pins.h"
 #include "../cmnds/cmd_public.h"
-#include "drv_bl_shared.h"
+#ifdef ENABLE_BLv2_SHARED
+	#include "drv_bl_shared_v2.h"
+#else
+	#include "drv_bl_shared.h"
+#endif
 #include "drv_pwrCal.h"
 #include "drv_spi.h"
 #include "drv_uart.h"
@@ -37,7 +39,7 @@ static unsigned short bl0942_opts= 0;
 #define BL0942_UART_PACKET_HEAD 0x55
 #define BL0942_UART_PACKET_LEN 23
 
-// Datasheet says 900 kHz is supported, but it produced ~50% check sum errors  
+// Datasheet says 900 kHz is supported, but it produced ~50% check sum errors
 #define BL0942_SPI_BAUD_RATE 800000 // 900000
 #define BL0942_SPI_CMD_READ 0x58
 #define BL0942_SPI_CMD_WRITE 0xA8
@@ -239,7 +241,7 @@ static int BL0942_UART_TryToGetNextPacket(int adeviceindex, int auartindex) {
 
 #if ENABLE_BL_TWIN
 static void UART_WriteReg(int auartindex, uint8_t reg, uint32_t val) {
-#else  
+#else
 static void UART_WriteReg(uint8_t reg, uint32_t val) {
 #endif
     uint8_t send[5];
@@ -321,7 +323,15 @@ static void BL0942_Init(void) {
   PrevCfCnt[BL0942_DEVICE_INDEX_1] = CF_CNT_INVALID;
 #endif
 
-    BL_Shared_Init();
+#ifdef ENABLE_BLv2_SHARED
+#if ENABLE_BL_TWIN
+	BLv2_Shared_Init(2, es_1PhaseMode, msVoltage|msCurrent|msPowerActiveSumm|msFrequency|msConsumptionTotalAp);
+#else
+	BLv2_Shared_Init(1, es_1PhaseMode, msVoltage|msCurrent|msPowerActiveSumm|msFrequency|msConsumptionTotalAp);
+#endif //ENABLE_BL_TWIN
+#else
+	BL_Shared_Init();
+#endif //ENABLE_BLv2_SHARED
 
     PwrCal_Init(PWR_CAL_DIVIDE, DEFAULT_VOLTAGE_CAL, DEFAULT_CURRENT_CAL,
                 DEFAULT_POWER_CAL);
@@ -485,5 +495,5 @@ void BL0942_AddCommands(void) {
   CMD_RegisterCommand("BL0942opts", CMD_BL0942opts, NULL);
 }
 #endif
-// close ENABLE_DRIVER_BL0942 
+// close ENABLE_DRIVER_BL0942
 #endif
