@@ -374,3 +374,9 @@ void TinyIR_NEC_RunFrame();
 void DRV_ESPHome_API_Init();
 void DRV_ESPHome_API_Deinit();
 void DRV_ESPHome_API_OnEverySecond();
+
+void ATMS_Init();
+void ATMS_StopDriver();
+void ATMS_AppendInformationToHTTPIndexPage(http_request_t *request, int bPreState);
+void ATMS_RunEverySecond();
+void ATMS_runQuickTick();

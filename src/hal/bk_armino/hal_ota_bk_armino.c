@@ -8,6 +8,7 @@
 #include "../../httpclient/http_client.h"
 #include "../../driver/drv_public.h"
 #include "../../driver/drv_bl_shared.h"
+#include "../../driver/drv_bl_shared_v2.h"
 #include "driver/flash.h"
 
 static unsigned char *sector = (void *)0;
@@ -196,7 +197,7 @@ int myhttpclientcallback(httprequest_t* request)
 			CFG_IncrementOTACount();
 			// make sure it's saved before reboot
 			CFG_Save_IfThereArePendingChanges();
-#if ENABLE_BL_SHARED
+#if ENABLE_BL_SHARED || ENABLE_BLv2_SHARED
 			if(DRV_IsMeasuringPower())
 			{
 				BL09XX_SaveEmeteringStatistics();

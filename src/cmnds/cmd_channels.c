@@ -439,7 +439,7 @@ static commandResult_t CMD_SetChannelPrivate(const void *context, const char *cm
 	return CMD_RES_OK;
 }
 static commandResult_t CMD_GetReadings(const void *context, const char *cmd, const char *args, int cmdFlags){
-#ifdef ENABLE_DRIVER_BL0937
+#if ENABLE_BL_SHARED || ENABLE_BLv2_SHARED
 	char tmp[96];
 	float v, c, p, f;
 	float e, elh;

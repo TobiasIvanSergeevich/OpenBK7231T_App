@@ -1,0 +1,3 @@
+startDriver NTP
+startDriver TuyaMCU
+startDriver ATMS100133

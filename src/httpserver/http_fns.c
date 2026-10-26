@@ -10,6 +10,7 @@
 #include "../driver/drv_girierMCU.h"
 #include "../driver/drv_public.h"
 #include "../driver/drv_bl_shared.h"
+#include "../driver/drv_bl_shared_v2.h"
 #include "../hal/hal_wifi.h"
 #include "../hal/hal_pins.h"
 #include "../hal/hal_flashConfig.h"
@@ -2207,13 +2208,14 @@ static void doHomeAssistantDiscovery_thread(void* param) {
 		topic = "homeassistant";
 	}
 
-#ifdef ENABLE_DRIVER_BL0937
+#if ENABLE_BL_SHARED || ENABLE_BLv2_SHARED
 	measuringPower = DRV_IsMeasuringPower();
+	addLogAdv(LOG_INFO, LOG_FEATURE_HTTP, "HASS measuring power is %s", measuringPower==true?"true":"false");
 #endif
 	measuringBattery = DRV_IsMeasuringBattery();
 
 	PIN_get_Relay_PWM_Count(&relayCount, &pwmCount, &dInputCount);
-	addLogAdv(LOG_INFO, LOG_FEATURE_HTTP, "HASS counts: %i rels, %i pwms, %i inps, %i excluded", relayCount, pwmCount, dInputCount, excludedCount);
+	addLogAdv(LOG_INFO, LOG_FEATURE_HTTP, "HASS counts: %i rels, %i pwms, %i inps, %i excluded, measuring power is %s", relayCount, pwmCount, dInputCount, excludedCount, measuringPower==true?"true":"false");
 
 #if ENABLE_LED_BASIC
 	ledDriverChipRunning = LED_IsLedDriverChipRunning();
@@ -2362,11 +2364,12 @@ static void doHomeAssistantDiscovery_thread(void* param) {
 	}
 #endif
 
-#ifdef ENABLE_DRIVER_BL0937
+#if ENABLE_BL_SHARED || ENABLE_BLv2_SHARED
 	if (measuringPower == true) {
 		for (i = OBK__FIRST; i <= OBK__LAST; i++)
 		{
 			dev_info = hass_init_energy_sensor_device_info(i, BL_SENSORS_IX_0);
+//			addLogAdv(LOG_INFO, LOG_FEATURE_DRV, "HA: dev_info=%s", dev_info);
 			if (dev_info) {
 				MQTT_QueuePublish(topic, dev_info->channel, hass_build_discovery_json(dev_info), OBK_PUBLISH_FLAG_RETAIN);
 				hass_free_device_info(dev_info);

@@ -35,6 +35,60 @@ typedef enum {
 	ENERGY_CHANNEL_B = 1,
 } ENERGY_CHANNEL;
 
+#if defined(ENABLE_BLv2_SHARED)
+
+#if ENABLED_TARIFED_ENERGY
+	#ifndef TARIFED_TIMEZONE_MAX
+		#error "Timezone count for tarifed energy (TARIFED_TIMEZONE_MAX) is not defined. Refer to obk_config.h"
+	#endif
+	#if (TARIFED_TIMEZONE_MAX > 4) 
+		#error "Timezone count must not exceed 4. TARIFED_TIMEZONE_MAX must be corrected in obk_config.h"
+	#endif
+	#if (TARIFED_TIMEZONE_MAX < 2)
+		#error "Timezone count (TARIFED_TIMEZONE_MAX) can not be less 2. Refer to obk_config.h"
+	#endif
+#endif
+
+typedef struct {	
+	float 		WA_Import_Total;
+	float 		WA_Export_Total;
+#if ENABLED_TARIFED_ENERGY
+	float 		WA_Import[TARIFED_TIMEZONE_MAX];
+#if (TARIFED_TIMEZONE_MAX < 4)
+	float		res_i[4-TARIFED_TIMEZONE_MAX];
+#endif	
+	float 		WA_Export[TARIFED_TIMEZONE_MAX];
+#if (TARIFED_TIMEZONE_MAX < 4)
+	float		res_e[4-TARIFED_TIMEZONE_MAX];	
+#endif	
+#else 
+	float		res_i[4];	
+	float		res_e[4];
+#endif	
+} ENERGY_DATA_V2;
+
+typedef struct {
+	long 				save_counter;
+#if ENABLED_TARIFED_ENERGY		
+	time_t 				timezones[TARIFED_TIMEZONE_MAX];
+#if (TARIFED_TIMEZONE_MAX < 4)
+	time_t 				rez_tz[4-TARIFED_TIMEZONE_MAX];
+#endif	
+#else 
+	time_t				res_tz[4];
+#endif
+	ENERGY_DATA_V2      energy_total;
+#if ENABLED_MONTH_ENERGY	
+	char 				actual_month;
+	ENERGY_DATA_V2 		month_energy[12];
+#else
+	char 				res0;
+	float				res1[12*(sizeof(ENERGY_DATA_V2)/sizeof(float))];
+#endif	
+} ENERGY_METERING_DATA_V2;
+
+#endif
+
 typedef struct flash_vars_structure
 {
 	// offset  0
@@ -72,6 +126,11 @@ float HAL_FlashVars_GetEnergyExport();
 #if defined(ENABLE_DRIVER_HLW8112SPI) || defined(ENABLE_DRIVER_BL0939SPI)
 void HAL_FlashVars_SaveEnergy(ENERGY_DATA** data, int channel_count);
 void HAL_FlashVars_GetEnergy(ENERGY_DATA* data, ENERGY_CHANNEL channel);
+#endif
+
+#if defined(ENABLE_BLv2_SHARED) 
+void HAL_FlashVars_SaveEnergy_BLv2(ENERGY_METERING_DATA_V2* data, int meter);
+void HAL_FlashVars_GetEnergy_BLv2(ENERGY_METERING_DATA_V2* data, int meter);
 #endif
 
 #endif /* __HALK_FLASH_VARS_H__ */

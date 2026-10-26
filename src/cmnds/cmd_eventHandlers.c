@@ -179,7 +179,7 @@ int EVENT_ParseEventName(const char *s) {
 	if (!stricmp(s, "LEDMode"))
 		return CMD_EVENT_LED_MODE;
 #endif
-#if ENABLE_BL_SHARED
+#if ENABLE_BL_SHARED || ENABLE_BLv2_SHARED
     if(!stricmp(s, "voltage"))
         return CMD_EVENT_CHANGE_VOLTAGE;
     if(!stricmp(s, "current"))

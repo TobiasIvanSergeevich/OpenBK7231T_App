@@ -239,7 +239,7 @@ float getBatteryLevel(const char* s)
 }
 #endif
 
-#ifdef ENABLE_DRIVER_BL0937
+#if ENABLE_BL_SHARED || ENABLE_BLv2_SHARED
 
 float getVoltage(const char *s) {
 	return DRV_GetReading(OBK_VOLTAGE);
