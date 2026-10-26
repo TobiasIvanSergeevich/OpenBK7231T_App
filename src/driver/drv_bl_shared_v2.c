@@ -37,7 +37,8 @@ typedef struct  {
 
 typedef struct {
 	portTickType 	energyCounterStamp;
-	float 			lastSavedEnergyCounterValue;
+	float 			lastSavedEnergyImpCounterValue;
+	float 			lastSavedEnergyExpCounterValue;
 	int 			stat_updatesSkipped;
 	int 			stat_updatesSent;
 	bool 			sensors_reciveddata;  //1 if data received
@@ -168,7 +169,6 @@ void BLv2_AppendInformationToHTTPIndexPageEx(int meter, http_request_t *request)
 
     poststr(request, "<hr><table style='width:100%'>");
 
-
 	for (int i = OBK__FIRST; i <= OBK_CONSUMPTION__DAILY_LAST; i++) {
 		// conditions for frequency
 		if (i == OBK_FREQUENCY && (meter != BL_SENSORS_IX_0 || isnan(sensdataset->sensors[i].lastReading))) continue;
@@ -177,7 +177,6 @@ void BLv2_AppendInformationToHTTPIndexPageEx(int meter, http_request_t *request)
 		}
 		if (BLv2_HasEnergySensorReading(meter, i) == false) continue;
 		if (i <= OBK__NUM_MEASUREMENTS || TIME_IsTimeSynced()) {
-			//addLogAdv(LOG_INFO, LOG_FEATURE_DRV, "%s[%d], %d", sensdataset->sensors[i].names.name_friendly, i, OBK__NUM_MEASUREMENTS);
 			poststr(request, "<tr><td><b>");
 			poststr(request, sensdataset->sensors[i].names.name_friendly);
 			poststr(request, "</b></td><td style='text-align: right;'>");
@@ -206,6 +205,67 @@ void BLv2_AppendInformationToHTTPIndexPageEx(int meter, http_request_t *request)
 	}
 	poststr(request, "</h5>");
 #endif //ENABLED_TARIFED_ENERGY
+
+#if ENABLED_MONTH_ENERGY
+	char* months_names[12] = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
+	poststr(request, "<h5>Energy at the end of month:<hr><table style='width:100%'><tr><td>Month</td>");
+	if (blv2_energy_meter.outputsensors&(0x01 << OBK_CONSUMPTION_WAExp_TOTAL)) {
+		poststr(request, "<td style='text-align: center;'>Total+,kWh</td><td style='text-align: center;'>Total-,kWh</td>");
+	} else {
+		poststr(request, "<td style='text-align: center;'>Total,kWh</td>");
+	}
+#if ENABLED_TARIFED_ENERGY
+#if TARIFED_TIMEZONE_MAX > 1
+	if (blv2_energy_meter.outputsensors&(0x01 << OBK_CONSUMPTION_WAExp_T1)) {
+		poststr(request, "<td style='text-align: center;'>T1+,kWh</td><td style='text-align: center;'>T1-,kWh</td><td style='text-align: center;'>T2+,kWh</td><td style='text-align: center;'>T2-,kWh</td>");
+	} else {
+		poststr(request, "<td style='text-align: center;'>T1,kWh</td><td style='text-align: center;'>T2,kWh</td>");
+	}
+#endif
+#if TARIFED_TIMEZONE_MAX > 2
+	if (blv2_energy_meter.outputsensors&(0x01 << OBK_CONSUMPTION_WAExp_T3)) {
+		poststr(request, "<td style='text-align: center;'>T3+,kWh</td><td style='text-align: center;'>T3-,kWh</td>");
+	} else {
+		poststr(request, "<td style='text-align: center;'>T3,kWh</td>");
+	}
+#endif
+#if TARIFED_TIMEZONE_MAX > 3
+	if (blv2_energy_meter.outputsensors&(0x01 << OBK_CONSUMPTION_WAExp_T4)) {
+		poststr(request, "<td style='text-align: center;'>T4+,kWh</td><td style='text-align: center;'>T4-,kWh</td>");
+	} else {
+		poststr(request, "<td style='text-align: center;'>T4,kWh</td>");
+	}
+#endif
+#endif //ENABLED_TARIFED_ENERGY
+	for (int month_i=0; month_i<12; month_i++) {
+		poststr(request, "<tr><td>");
+		poststr(request, months_names[month_i]);
+		poststr(request, "</td><td style='text-align: center;'>");
+		hprintf255(request, "%.*f</td>", sensdataset->sensors[OBK_CONSUMPTION_TOTAL].rounding_decimals,
+					blv2_energy_meter.energy_meter_data[meter].month_energy[month_i].WA_Import_Total * 0.001);
+#if ENABLED_TARIFED_ENERGY
+#if TARIFED_TIMEZONE_MAX > 1
+		poststr(request, "<td style='text-align: center;'>");
+		hprintf255(request, "%.*f</td>", sensdataset->sensors[OBK_CONSUMPTION_TOTAL].rounding_decimals,
+					blv2_energy_meter.energy_meter_data[meter].month_energy[month_i].WA_Import[0] * 0.001);
+		poststr(request, "<td style='text-align: center;'>");
+		hprintf255(request, "%.*f</td>", sensdataset->sensors[OBK_CONSUMPTION_TOTAL].rounding_decimals,
+					blv2_energy_meter.energy_meter_data[meter].month_energy[month_i].WA_Import[1] * 0.001);
+#endif
+#if TARIFED_TIMEZONE_MAX > 2
+		poststr(request, "<td style='text-align: center;'>");
+		hprintf255(request, "%.*f</td>", sensdataset->sensors[OBK_CONSUMPTION_TOTAL].rounding_decimals,
+					blv2_energy_meter.energy_meter_data[meter].month_energy[month_i].WA_Import[2] * 0.001);
+#endif
+#if TARIFED_TIMEZONE_MAX > 3
+		poststr(request, "<td style='text-align: center;'>");
+		hprintf255(request, "%.*f</td>", sensdataset->sensors[OBK_CONSUMPTION_TOTAL].rounding_decimals,
+					blv2_energy_meter.energy_meter_data[meter].month_energy[month_i].WA_Import[3] * 0.001);
+#endif
+#endif //ENABLED_TARIFED_ENERGY
+	}
+	poststr(request, "</table>");
+#endif //ENABLED_MONTH_ENERGY
 
     if (meter == BL_SENSORS_IX_0) {
 		poststr(request, "<h5>Energy Clear Date: ");
@@ -340,7 +400,7 @@ commandResult_t BLv2_ResetEnergyCounterEx(int meter, float* pvalue)
     int i;
     if (!pvalue) {
 		//addLogAdv(LOG_INFO, LOG_FEATURE_ENERGYMETER, "ResEC %i", meter);
-		blv2_energy_meter.energy_meter_data[meter].lastSavedEnergyCounterValue = 0.0; //20250203 reset lastSavedEnergyCounterValue, otherwise the values will not be saved until restart BL
+		blv2_energy_meter.energy_meter_data[meter].lastSavedEnergyImpCounterValue = 0.0; //20250203 reset lastSavedEnergyImpCounterValue, otherwise the values will not be saved until restart BL
 		sensdataset->sensors[OBK_CONSUMPTION_TOTAL].lastReading = 0.0;
 		blv2_energy_meter.energy_meter_data[meter].energyCounterStamp = xTaskGetTickCount();
         if (blv2_energy_meter.energyCounterStatsEnable == true) {
@@ -678,7 +738,7 @@ commandResult_t BLv2_SetTarifTimezone(const void *context, const char *cmd, cons
 
 	if (BLv2_CheckTarifTimezone(meter_i) == true) {
 		blv2_energy_meter.energy_meter_data[meter_i].tarif_tz_ok = 1;
-		if (OTA_GetProgress()==-1) {			
+		if (OTA_GetProgress()==-1) {
 			BLv2_SaveTarifAndMonthStatistics();
 		}
 	}
@@ -743,29 +803,34 @@ void BLv2_ProcessUpdateEnergy(int meter, float energyWAp, float energyWRp, float
 	time_t deviceTime;
 	char datetime[64];
 	bool needSave = false;
-
-	float energy = 0;
-	if (!isnan(energyWAp)) {
-		if (energyWAp >= 0) {
-			energy = energyWAp;
+	float energy_val [4] = {energyWAp, energyWRp, energyWAm, energyWRm};
+	int   energy_type[4] = {OBK_CONSUMPTION_WAImp_TOTAL, -1, OBK_CONSUMPTION_WAExp_TOTAL, -1};
+	for (int energy_i = 0; energy_i<4; energy_i++) {
+		if (energy_type[energy_i]==-1) continue;
+		if (isnan(energy_val[energy_i])) continue;
+		float energy = 0;
+		if (energy_val[energy_i] > 0) {
+			energy = energy_val[energy_i];
 			needSave = true;
 		}
-
-		sensdataset->sensors[OBK_CONSUMPTION_TOTAL].lastReading += (double)energy;
+		sensdataset->sensors[energy_type[energy_i]].lastReading += (double)energy;
 		blv2_energy_meter.energy_meter_data[meter].energyCounterStamp = nowTickCount;
 
 		// Handle daily consumption
-		sensdataset->sensors[OBK_CONSUMPTION_TODAY].lastReading += energy;
+		if (energy_type[energy_i] == OBK_CONSUMPTION_WAImp_TOTAL) {
+			sensdataset->sensors[OBK_CONSUMPTION_TODAY].lastReading += energy;
+		}
 		if (TIME_IsTimeSynced()) { // if time is synchronized
 			deviceTime = (time_t)TIME_GetCurrentTime();
 			TimeComponents tc = calculateComponents(deviceTime);
-			//uint8_t mday=TIME_GetMDay();
+
 			uint8_t mday=tc.day;
 			if (blv2_energy_meter.ConsumptionResetTime == 0)	blv2_energy_meter.ConsumptionResetTime = (time_t)deviceTime;
 
 			if (blv2_energy_meter.energy_meter_data[meter].actual_mday == -1) {
 				blv2_energy_meter.energy_meter_data[meter].actual_mday = mday;
 			}
+
 			if (blv2_energy_meter.energy_meter_data[meter].actual_mday != mday) { // day changed
 				for (i = OBK_CONSUMPTION__DAILY_LAST; i >= OBK_CONSUMPTION__DAILY_FIRST; i--) {
 					sensdataset->sensors[i].lastReading = sensdataset->sensors[i - 1].lastReading;
@@ -773,8 +838,6 @@ void BLv2_ProcessUpdateEnergy(int meter, float energyWAp, float energyWRp, float
 				sensdataset->sensors[OBK_CONSUMPTION_TODAY].lastReading = 0.0;
 				blv2_energy_meter.energy_meter_data[meter].actual_mday = mday;
 
-				//MQTT_PublishMain_StringFloat(sensdataset->sensors[OBK_CONSUMPTION_YESTERDAY].names.name_mqtt, BL_ChangeEnergyUnitIfNeeded(sensors[OBK_CONSUMPTION_YESTERDAY].lastReading ),
-				//							sensdataset->sensors[OBK_CONSUMPTION_YESTERDAY].rounding_decimals, 0);
 				//blv2_energy_meter.stat_updatesSent++;
 				/*
 				if (OTA_GetProgress() == -1) {
@@ -797,9 +860,16 @@ void BLv2_ProcessUpdateEnergy(int meter, float energyWAp, float energyWRp, float
 					}
 					current_tarif++;
 				} while (current_tarif < TARIFED_TIMEZONE_MAX);
+				if (current_tarif == TARIFED_TIMEZONE_MAX) current_tarif = TARIFED_TIMEZONE_MAX-1;
 				if (current_tarif >= 0 && current_tarif < TARIFED_TIMEZONE_MAX) {
-					sensdataset->sensors[OBK_CONSUMPTION_WAImp_T1+current_tarif].lastReading += energy;
-					needSave = true;
+					if (energy_type[energy_i] == OBK_CONSUMPTION_WAImp_TOTAL) {
+						sensdataset->sensors[OBK_CONSUMPTION_WAImp_T1+current_tarif].lastReading += energy;
+						needSave = true;
+					}
+					if (energy_type[energy_i] == OBK_CONSUMPTION_WAExp_TOTAL) {
+						sensdataset->sensors[OBK_CONSUMPTION_WAExp_T1+current_tarif].lastReading += energy;
+						needSave = true;
+					}
 				} else {
 					// ????
 				}
@@ -811,17 +881,17 @@ void BLv2_ProcessUpdateEnergy(int meter, float energyWAp, float energyWRp, float
 					blv2_energy_meter.energy_meter_data[meter].month_energy[blv2_energy_meter.energy_meter_data[meter].actual_month].WA_Import_Total = sensdataset->sensors[OBK_CONSUMPTION_WAImp_TOTAL].lastReading;
 					blv2_energy_meter.energy_meter_data[meter].month_energy[blv2_energy_meter.energy_meter_data[meter].actual_month].WA_Export_Total = sensdataset->sensors[OBK_CONSUMPTION_WAExp_TOTAL].lastReading;
 #if ENABLED_TARIFED_ENERGY
-#if TARIFED_TIMEZONE_MAX == 2
+#if TARIFED_TIMEZONE_MAX > 1
 					blv2_energy_meter.energy_meter_data[meter].month_energy[blv2_energy_meter.energy_meter_data[meter].actual_month].WA_Import[0] = sensdataset->sensors[OBK_CONSUMPTION_WAImp_T1].lastReading;
 					blv2_energy_meter.energy_meter_data[meter].month_energy[blv2_energy_meter.energy_meter_data[meter].actual_month].WA_Import[1] = sensdataset->sensors[OBK_CONSUMPTION_WAImp_T2].lastReading;
 					blv2_energy_meter.energy_meter_data[meter].month_energy[blv2_energy_meter.energy_meter_data[meter].actual_month].WA_Export[0] = sensdataset->sensors[OBK_CONSUMPTION_WAExp_T1].lastReading;
 					blv2_energy_meter.energy_meter_data[meter].month_energy[blv2_energy_meter.energy_meter_data[meter].actual_month].WA_Export[1] = sensdataset->sensors[OBK_CONSUMPTION_WAExp_T2].lastReading;
 #endif
-#if TARIFED_TIMEZONE_MAX == 3
+#if TARIFED_TIMEZONE_MAX > 2
 					blv2_energy_meter.energy_meter_data[meter].month_energy[blv2_energy_meter.energy_meter_data[meter].actual_month].WA_Import[2] = sensdataset->sensors[OBK_CONSUMPTION_WAImp_T3].lastReading;
 					blv2_energy_meter.energy_meter_data[meter].month_energy[blv2_energy_meter.energy_meter_data[meter].actual_month].WA_Export[2] = sensdataset->sensors[OBK_CONSUMPTION_WAExp_T3].lastReading;
 #endif
-#if TARIFED_TIMEZONE_MAX == 4
+#if TARIFED_TIMEZONE_MAX > 3
 					blv2_energy_meter.energy_meter_data[meter].month_energy[blv2_energy_meter.energy_meter_data[meter].actual_month].WA_Import[3] = sensdataset->sensors[OBK_CONSUMPTION_WAImp_T4].lastReading;
 					blv2_energy_meter.energy_meter_data[meter].month_energy[blv2_energy_meter.energy_meter_data[meter].actual_month].WA_Export[3] = sensdataset->sensors[OBK_CONSUMPTION_WAExp_T4].lastReading;
 #endif
@@ -831,6 +901,7 @@ void BLv2_ProcessUpdateEnergy(int meter, float energyWAp, float energyWRp, float
 				}
 				needSave = true;
 			}
+
 #endif	//ENABLED_MONTH_ENERGY
 		} else {
 #if ENABLED_TARIFED_ENERGY
@@ -917,15 +988,18 @@ void BLv2_ProcessUpdateEnergy(int meter, float energyWAp, float energyWRp, float
 				blv2_energy_meter.energyCounterMinutesStamp = nowTickCount;
 				blv2_energy_meter.energyCounterMinutesIndex++;
 			}
-			if (blv2_energy_meter.energyCounterMinutes != NULL) blv2_energy_meter.energyCounterMinutes[0] += energy;
+			if (blv2_energy_meter.energyCounterMinutes != NULL && energy_type[energy_i] == OBK_CONSUMPTION_WAImp_TOTAL)
+				blv2_energy_meter.energyCounterMinutes[0] += energy;
 		}
 	}
 	// Save if need
 	if (needSave) {
-		if (((sensdataset->sensors[OBK_CONSUMPTION_TOTAL].lastReading - blv2_energy_meter.energy_meter_data[meter].lastSavedEnergyCounterValue) >= blv2_energy_meter.changeSavedThresholdEnergy) ||
+		if (((sensdataset->sensors[OBK_CONSUMPTION_WAImp_TOTAL].lastReading - blv2_energy_meter.energy_meter_data[meter].lastSavedEnergyImpCounterValue) >= blv2_energy_meter.changeSavedThresholdEnergy) ||
+		    ((sensdataset->sensors[OBK_CONSUMPTION_WAExp_TOTAL].lastReading - blv2_energy_meter.energy_meter_data[meter].lastSavedEnergyImpCounterValue) >= blv2_energy_meter.changeSavedThresholdEnergy) ||
 			((nowTickCount - blv2_energy_meter.lastConsumptionSaveStamp) >= (6 * 3600 * 1000 / portTICK_PERIOD_MS))) {
 			if (OTA_GetProgress() == -1) {
-				blv2_energy_meter.energy_meter_data[meter].lastSavedEnergyCounterValue = (float)sensdataset->sensors[OBK_CONSUMPTION_TOTAL].lastReading;
+				blv2_energy_meter.energy_meter_data[meter].lastSavedEnergyImpCounterValue = (float)sensdataset->sensors[OBK_CONSUMPTION_WAImp_TOTAL].lastReading;
+				blv2_energy_meter.energy_meter_data[meter].lastSavedEnergyExpCounterValue = (float)sensdataset->sensors[OBK_CONSUMPTION_WAExp_TOTAL].lastReading;
 				BLv2_SaveEmeteringStatistics();
 				blv2_energy_meter.lastConsumptionSaveStamp = nowTickCount;
 			}
@@ -1251,13 +1325,13 @@ void BLv2_Shared_Init(int meter_count, energySensorMode_t mode, int MeasuredSens
 	if (blv2_energy_meter.measuredsensors&msConsumptionTotalAp || blv2_energy_meter.measuredsensors&msPowerActiveSumm) {
 		blv2_energy_meter.outputsensors |= (0x01 << OBK_CONSUMPTION_WAImp_TOTAL);
 #if ENABLED_TARIFED_ENERGY
-#if TARIFED_TIMEZONE_MAX == 2
+#if TARIFED_TIMEZONE_MAX > 1
 		blv2_energy_meter.outputsensors |= (0x01 << OBK_CONSUMPTION_WAImp_T1)|(0x01 << OBK_CONSUMPTION_WAImp_T2);
 #endif
-#if TARIFED_TIMEZONE_MAX == 3
+#if TARIFED_TIMEZONE_MAX > 2
 		blv2_energy_meter.outputsensors |= (0x01 << OBK_CONSUMPTION_WAImp_T3);
 #endif
-#if TARIFED_TIMEZONE_MAX == 4
+#if TARIFED_TIMEZONE_MAX > 3
 		blv2_energy_meter.outputsensors |= (0x01 << OBK_CONSUMPTION_WAImp_T4);
 #endif
 #endif 	//ENABLED_TARIFED_ENERGY
@@ -1265,13 +1339,13 @@ void BLv2_Shared_Init(int meter_count, energySensorMode_t mode, int MeasuredSens
 	if (blv2_energy_meter.measuredsensors&msConsumptionTotalAm /*|| blv2_energy_meter.measuredsensors&msPowerActiveSumm*/) { // TODO: Exported energy can be calculated,if active power have a sign
 		blv2_energy_meter.outputsensors |= (0x01 << OBK_CONSUMPTION_WAExp_TOTAL);
 #if ENABLED_TARIFED_ENERGY
-#if TARIFED_TIMEZONE_MAX == 2
+#if TARIFED_TIMEZONE_MAX > 1
 		blv2_energy_meter.outputsensors |= (0x01 << OBK_CONSUMPTION_WAExp_T1)|(0x01 << OBK_CONSUMPTION_WAExp_T2);
 #endif
-#if TARIFED_TIMEZONE_MAX == 3
+#if TARIFED_TIMEZONE_MAX > 2
 		blv2_energy_meter.outputsensors |= (0x01 << OBK_CONSUMPTION_WAExp_T3);
 #endif
-#if TARIFED_TIMEZONE_MAX == 4
+#if TARIFED_TIMEZONE_MAX > 3
 		blv2_energy_meter.outputsensors |= (0x01 << OBK_CONSUMPTION_WAExp_T4);
 #endif
 #endif //ENABLED_TARIFED_ENERGY
@@ -1502,7 +1576,7 @@ void BLv2_Shared_Init(int meter_count, energySensorMode_t mode, int MeasuredSens
 		sensdataset->sensors[OBK_CONSUMPTION_3_DAYS_AGO].changeSendThreshold = 0.1;
 
 #if ENABLED_TARIFED_ENERGY
-#if TARIFED_TIMEZONE_MAX == 2
+#if TARIFED_TIMEZONE_MAX > 1
 		sensdataset->sensors[OBK_CONSUMPTION_WAImp_T1].names.hass_dev_class = hass_dev_class_names[hass_dev_class_energy];
 		sensdataset->sensors[OBK_CONSUMPTION_WAImp_T1].names.units          =          units_names[          unit_energy_wa];
 		if (blv2_energy_meter.outputsensors&(0x01 << OBK_CONSUMPTION_WAExp_TOTAL)) {
@@ -1546,7 +1620,7 @@ void BLv2_Shared_Init(int meter_count, energySensorMode_t mode, int MeasuredSens
 		sensdataset->sensors[OBK_CONSUMPTION_WAExp_T2].rounding_decimals = 3;
 		sensdataset->sensors[OBK_CONSUMPTION_WAExp_T2].changeSendThreshold = 0.1;
 #endif
-#if TARIFED_TIMEZONE_MAX == 3
+#if TARIFED_TIMEZONE_MAX > 2
 		sensdataset->sensors[OBK_CONSUMPTION_WAImp_T3].names.hass_dev_class = hass_dev_class_names[hass_dev_class_energy];
 		sensdataset->sensors[OBK_CONSUMPTION_WAImp_T3].names.units          =          units_names[          unit_energy_wa];
 		if (blv2_energy_meter.outputsensors&(0x01 << OBK_CONSUMPTION_WAExp_TOTAL)) {
@@ -1568,7 +1642,7 @@ void BLv2_Shared_Init(int meter_count, energySensorMode_t mode, int MeasuredSens
 		sensdataset->sensors[OBK_CONSUMPTION_WAExp_T3].rounding_decimals = 3;
 		sensdataset->sensors[OBK_CONSUMPTION_WAExp_T3].changeSendThreshold = 0.1;
 #endif
-#if TARIFED_TIMEZONE_MAX == 4
+#if TARIFED_TIMEZONE_MAX > 3
 		sensdataset->sensors[OBK_CONSUMPTION_WAImp_T4].names.hass_dev_class = hass_dev_class_names[hass_dev_class_energy];
 		sensdataset->sensors[OBK_CONSUMPTION_WAImp_T4].names.units          =          units_names[          unit_energy_wa];
 		if (blv2_energy_meter.outputsensors&(0x01 << OBK_CONSUMPTION_WAExp_TOTAL)) {
@@ -1635,7 +1709,7 @@ void BLv2_Shared_Init(int meter_count, energySensorMode_t mode, int MeasuredSens
 					sensdataset->sensors[OBK_CONSUMPTION_YESTERDAY].lastReading = data.YesterdayConsumption;
 					sensdataset->sensors[OBK_CONSUMPTION_2_DAYS_AGO].lastReading = data.ConsumptionHistory[0];
 					sensdataset->sensors[OBK_CONSUMPTION_3_DAYS_AGO].lastReading = data.ConsumptionHistory[1];
-					blv2_energy_meter.energy_meter_data[BL_SENSORS_IX_0].lastSavedEnergyCounterValue = data.TotalConsumption;
+					blv2_energy_meter.energy_meter_data[BL_SENSORS_IX_0].lastSavedEnergyImpCounterValue = data.TotalConsumption;
 					blv2_energy_meter.energy_meter_data[BL_SENSORS_IX_0].energyCounterStamp = nowTickCount;
 					break;
 				};
@@ -1643,11 +1717,11 @@ void BLv2_Shared_Init(int meter_count, energySensorMode_t mode, int MeasuredSens
 #if ENABLE_BL_TWIN
 					sensdataset->sensors[OBK_CONSUMPTION_TOTAL].lastReading = data.TotalConsumption_b;
 					sensdataset->sensors[OBK_CONSUMPTION_TODAY].lastReading = data.TodayConsumpion_b;
-					blv2_energy_meter.energy_meter_data[BL_SENSORS_IX_1].lastSavedEnergyCounterValue = data.TotalConsumption_b;
+					blv2_energy_meter.energy_meter_data[BL_SENSORS_IX_1].lastSavedEnergyImpCounterValue = data.TotalConsumption_b;
 #else
 					sensdataset->sensors[OBK_CONSUMPTION_TOTAL].lastReading = data.ConsumptionHistory[0];
 					sensdataset->sensors[OBK_CONSUMPTION_TODAY].lastReading = data.ConsumptionHistory[1];
-					blv2_energy_meter.energy_meter_data[BL_SENSORS_IX_1].lastSavedEnergyCounterValue = data.ConsumptionHistory[0];
+					blv2_energy_meter.energy_meter_data[BL_SENSORS_IX_1].lastSavedEnergyImpCounterValue = data.ConsumptionHistory[0];
 #endif
 					blv2_energy_meter.energy_meter_data[BL_SENSORS_IX_1].energyCounterStamp = nowTickCount;
 					break;

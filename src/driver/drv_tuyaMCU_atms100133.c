@@ -231,7 +231,7 @@ void ATMS_runQuickTick()
 		case sm_QueryProductInformation: {
 			addLogAdv(LOG_INFO, LOG_FEATURE_DRV, "ATMS: Try to get MCU product information.");
 			CMD_ExecuteCommand("tuyaMcu_sendProductInformation", 0);
-			drv_atms_delay = 500/portTICK_PERIOD_MS;
+			drv_atms_delay = 5000/portTICK_PERIOD_MS;
 			drv_atms_state = sm_CheckProductInformation;			
 			return;
 			break;
