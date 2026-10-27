@@ -11,7 +11,9 @@ set BUILD_DIR=platforms\ESP8266\build
 set BOOTLOADER_ADDR=0x0
 
 :: Check for action argument
-if not "%~1"=="" set ACTION=%~1
+if not "%~1"=="" set OBK_VARIANT=%~1
+if not "%~2"=="" set APP_VERSION=%~2
+if not "%~3"=="" set ACTION=%~3
 
 echo ==============================================
 echo Building OpenBeken ESP8266 on Windows natively
