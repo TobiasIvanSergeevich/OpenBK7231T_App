@@ -897,7 +897,11 @@ HassDeviceInfo* hass_init_energy_sensor_device_info(int index, int asensdataseti
 	//in twin mode, for ix0 is last OBK_CONSUMPTION_YESTERDAY, for ix1 ,OBK_CONSUMPTION_TODAY
 	if ((index > OBK_CONSUMPTION_STORED_LAST[asensdatasetix]) && (index <= OBK_CONSUMPTION__DAILY_LAST)) return info;
 #endif
+#ifdef ENABLE_BLv2_SHARED
+	if (index == OBK_FREQUENCY || !BL_HasEnergySensorReadingEx(asensdatasetix, index)) return info;
+#else
 	if (index == OBK_FREQUENCY && !BL_HasEnergySensorReadingEx(asensdatasetix, index)) return info;
+#endif
 	info = hass_init_device_info(ENERGY_METER_SENSOR, index, NULL, NULL, asensdatasetix, NULL);
 
 	cJSON_AddStringToObject(info->root, "dev_cla", DRV_GetEnergySensorNamesEx(asensdatasetix,index)->hass_dev_class);   //device_class=voltage,current,power, energy, timestamp

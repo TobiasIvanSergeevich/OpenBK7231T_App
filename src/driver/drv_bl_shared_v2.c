@@ -1335,6 +1335,7 @@ void BLv2_Shared_Init(int meter_count, energySensorMode_t mode, int MeasuredSens
 		blv2_energy_meter.outputsensors |= (0x01 << OBK_CONSUMPTION_WAImp_T4);
 #endif
 #endif 	//ENABLED_TARIFED_ENERGY
+		blv2_energy_meter.outputsensors |= (0x01<<OBK_CONSUMPTION_TODAY)|(0x01<<OBK_CONSUMPTION_YESTERDAY)|(0x01<<OBK_CONSUMPTION_2_DAYS_AGO)|(0x01<<OBK_CONSUMPTION_3_DAYS_AGO);
 	}
 	if (blv2_energy_meter.measuredsensors&msConsumptionTotalAm /*|| blv2_energy_meter.measuredsensors&msPowerActiveSumm*/) { // TODO: Exported energy can be calculated,if active power have a sign
 		blv2_energy_meter.outputsensors |= (0x01 << OBK_CONSUMPTION_WAExp_TOTAL);
@@ -1350,8 +1351,6 @@ void BLv2_Shared_Init(int meter_count, energySensorMode_t mode, int MeasuredSens
 #endif
 #endif //ENABLED_TARIFED_ENERGY
 	}
-
-	blv2_energy_meter.outputsensors |= (0x01<<OBK_CONSUMPTION_TODAY)|(0x01<<OBK_CONSUMPTION_YESTERDAY)|(0x01<<OBK_CONSUMPTION_2_DAYS_AGO)|(0x01<<OBK_CONSUMPTION_3_DAYS_AGO);
 
 	blv2_energy_meter.energyCounterStatsEnable = false;
 	blv2_energy_meter.energyCounterSampleCount = 60;
@@ -1483,7 +1482,7 @@ void BLv2_Shared_Init(int meter_count, energySensorMode_t mode, int MeasuredSens
 		sensdataset->sensors[OBK_FREQUENCY].names.hass_dev_class = hass_dev_class_names[hass_dev_class_frequency];
 		sensdataset->sensors[OBK_FREQUENCY].names.units          =          units_names[          unit_frequency];
 		MAKE_SENSOR_NAME(sensdataset->sensors[OBK_FREQUENCY].names.name_friendly, "Frequency%s", name_suffix);
-		MAKE_SENSOR_NAME(sensdataset->sensors[OBK_FREQUENCY].names.name_mqtt, "frequency%s", mqtt_suffix);
+		MAKE_SENSOR_NAME(sensdataset->sensors[OBK_FREQUENCY].names.name_mqtt, "138%s", mqtt_suffix); //// OBK_FREQUENCY - SPECIAL_CHANNEL_OBK_FREQUENCY is 138
 		MAKE_SENSOR_NAME(sensdataset->sensors[OBK_FREQUENCY].names.hass_uniq_id_suffix, "%s138", uid_suffix);
 		sensdataset->sensors[OBK_FREQUENCY].rounding_decimals = 2;
 		sensdataset->sensors[OBK_FREQUENCY].changeSendThreshold = 0.02;

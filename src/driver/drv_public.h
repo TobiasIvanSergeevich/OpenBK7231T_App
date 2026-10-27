@@ -128,15 +128,15 @@ void DRV_DGR_OnLedFinalColorsChange(byte rgbcw[5]);
 #ifdef ENABLE_BLv2_SHARED
 
 float DRV_GetReading_v2(int asensdatasetix, energySensor_t type);
-#define DRV_GetReading(type) DRV_GetReading_v2(0, type)
+static inline float DRV_GetReading(energySensor_t type) { return DRV_GetReading_v2(0, type); }
 
 int BLv2_HasEnergySensorReading(int asensdatasetix, energySensor_t type);
-#define BL_HasEnergySensorReadingEx(asensdatasetix, type) BLv2_HasEnergySensorReading(asensdatasetix, type)
-#define BL_HasEnergySensorReading(type) BLv2_HasEnergySensorReading(0, type)
+static inline int BL_HasEnergySensorReadingEx(int asensdatasetix, energySensor_t type) { return BLv2_HasEnergySensorReading(asensdatasetix, type); }
+static inline int BL_HasEnergySensorReading(energySensor_t type) {	return BLv2_HasEnergySensorReading(0, type); }
 
 energySensorNames_t* DRV_GetEnergySensorNames_v2(int asensdatasetix, energySensor_t type);
-#define DRV_GetEnergySensorNames(type) DRV_GetEnergySensorNames_v2(0, type)
-#define DRV_GetEnergySensorNamesEx(asensdatasetix, type) DRV_GetEnergySensorNames_v2(asensdatasetix, type)
+static inline energySensorNames_t* DRV_GetEnergySensorNames(energySensor_t type) { return DRV_GetEnergySensorNames_v2(0, type); }
+static inline energySensorNames_t* DRV_GetEnergySensorNamesEx(int asensdatasetix, energySensor_t type) { return DRV_GetEnergySensorNames_v2(asensdatasetix, type); }
 
 #else
 

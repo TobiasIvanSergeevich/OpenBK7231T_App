@@ -849,6 +849,7 @@
 #if ENABLE_DRIVER_ATMS100133 
 	#ifndef TUYA_MCU
 		#define   TUYA_MCU						1
+	#endif
 	#define ENABLE_BLv2_SHARED					1
 	#ifdef ENABLE_BL_SHARED
 		#undef ENABLE_BL_SHARED
