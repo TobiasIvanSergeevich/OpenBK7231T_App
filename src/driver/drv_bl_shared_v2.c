@@ -136,7 +136,8 @@ static blv2_energy_meter_t 	blv2_energy_meter;
  * @brief Reset recived data flag
  */
 void BLv2_ResetRecivedDataBool() {
-  for (int i = 0; i < blv2_energy_meter.meter_count; i++) blv2_energy_meter.energy_meter_data[i].sensors_reciveddata = 0;
+	if (!blv2_energy_meter_init) return;
+	for (int i = 0; i < blv2_energy_meter.meter_count; i++) blv2_energy_meter.energy_meter_data[i].sensors_reciveddata = 0;
 }
 
 /**
@@ -144,6 +145,7 @@ void BLv2_ResetRecivedDataBool() {
  */
 void BLv2_AppendInformationToHTTPIndexPageEx(int meter, http_request_t *request)
 {
+	if (!blv2_energy_meter_init) return;
 	if ((meter < 0) || (meter > (blv2_energy_meter.meter_count-1))) return;  //to avoid bad index on data[BL_SENSDATASETS_COUNT]
 	energysensdataset_t* sensdataset = &blv2_energy_meter.datasetlist[meter];
 
@@ -330,6 +332,7 @@ void BLv2_AppendInformationToHTTPIndexPage(http_request_t* request, int bPreStat
  * @brief Save energy to flash. Only for two first meter channels!
  */
 void BLv2_SaveTarifAndMonthStatistics() {
+	if (!blv2_energy_meter_init) return;
 	ENERGY_METERING_DATA_V2 energy_data_new;
 	for (int meter_i=0; meter_i < blv2_energy_meter.meter_count; meter_i++) {
 #if ENABLED_TARIFED_ENERGY
@@ -353,6 +356,7 @@ void BLv2_SaveTarifAndMonthStatistics() {
  */
 void BLv2_SaveEmeteringStatistics()
 {
+	if (!blv2_energy_meter_init) return;
 	energysensdataset_t* sensdataset_chA = &blv2_energy_meter.datasetlist[BL_SENSORS_IX_0];
 	energysensdataset_t* sensdataset_chB = NULL;
 	if (blv2_energy_meter.meter_count > 1) {
@@ -395,7 +399,7 @@ void BLv2_SaveEmeteringStatistics()
 commandResult_t BLv2_ResetEnergyCounterEx(int meter, float* pvalue)
 {
 	if (!blv2_energy_meter_init) return CMD_RES_ERROR; //energy meter not init yet
-	if ((meter < 0) || (meter > (blv2_energy_meter.meter_count-1))) return CMD_RES_ERROR;  //to avoid bad index
+	if ((meter < 0) || (meter >= blv2_energy_meter.meter_count)) return CMD_RES_ERROR;  //to avoid bad index
 	energysensdataset_t* sensdataset = &blv2_energy_meter.datasetlist[meter];
     int i;
     if (!pvalue) {
@@ -465,6 +469,7 @@ commandResult_t BLv2_ResetEnergyCounter(const void* context, const char* cmd, co
  */
 commandResult_t BLv2_SetupEnergyStatistic(const void *context, const char *cmd, const char *args, int cmdFlags)
 {
+	if (!blv2_energy_meter_init) return CMD_RES_ERROR;
     // SetupEnergyStats enable sample_time sample_count
     int enable;
     int sample_time;
@@ -792,7 +797,7 @@ float BL_ChangeEnergyUnitIfNeeded(float Wh) {
 void BLv2_ProcessUpdateEnergy(int meter, float energyWAp, float energyWRp, float energyWAm, float energyWRm, int line) {
 	if (!blv2_energy_meter_init) return;
 	if (meter < 0) return;
-	if (meter > (blv2_energy_meter.meter_count-1)) return;
+	if (meter >= blv2_energy_meter.meter_count) return;
 	energysensdataset_t* sensdataset = &blv2_energy_meter.datasetlist[meter];
 	int i;
 	cJSON* root;
@@ -1013,7 +1018,7 @@ void BLv2_ProcessUpdateEnergy(int meter, float energyWAp, float energyWRp, float
 void BLv2_ProcessUpdateMesuaments(int meter, float voltage, float current, float power_active, float power_reactive, float power_apparent, float power_factor, float frequency, int line) {
 	if (!blv2_energy_meter_init) return;
 	if (meter < 0) return;
-	if (meter > (blv2_energy_meter.meter_count-1)) return;
+	if (meter >= blv2_energy_meter.meter_count) return;
 	portTickType xPassedTicks;
 	float diff;
 	char datetime[64];
@@ -1274,7 +1279,7 @@ void BLv2_ProcessUpdateMesuaments(int meter, float voltage, float current, float
 	name = os_malloc(needed);						                \
     if (name) {                                                     \
 		sprintf((char*)name, pattern, var);	     				    \
-		name[needed] = 0;                                           \
+		name[needed-1] = 0;                                         \
 	}                                                               \
     } while (0)
 
@@ -1287,6 +1292,7 @@ void BLv2_Shared_Init(int meter_count, energySensorMode_t mode, int MeasuredSens
 		return;
 	}
 	if ((meter_count < 1) & (meter_count > BLV2_EMETERS_MAX)) return; // now only one or two sensors (when ENABLE_BL_TWIN) support
+
 	blv2_energy_meter.meter_count = meter_count;
 	blv2_energy_meter.meter_mode  = mode;
 	blv2_energy_meter.measuredsensors = MeasuredSensors;
@@ -1486,7 +1492,7 @@ void BLv2_Shared_Init(int meter_count, energySensorMode_t mode, int MeasuredSens
 		MAKE_SENSOR_NAME(sensdataset->sensors[OBK_FREQUENCY].names.hass_uniq_id_suffix, "%s138", uid_suffix);
 		sensdataset->sensors[OBK_FREQUENCY].rounding_decimals = 2;
 		sensdataset->sensors[OBK_FREQUENCY].changeSendThreshold = 0.02;
-		sensdataset->sensors[OBK_FREQUENCY].lastReading = NAN;
+		//sensdataset->sensors[OBK_FREQUENCY].lastReading = NAN;
 
 		sensdataset->sensors[OBK_POWER_APPARENT].names.hass_dev_class = hass_dev_class_names[hass_dev_class_apparent_power];
 		sensdataset->sensors[OBK_POWER_APPARENT].names.units          =          units_names[          unit_apparent_power];
@@ -1694,13 +1700,11 @@ void BLv2_Shared_Init(int meter_count, energySensorMode_t mode, int MeasuredSens
     ENERGY_METERING_DATA data;
 	{
 		addLogAdv(LOG_INFO, LOG_FEATURE_ENERGYMETER, "Read ENERGYMETER values sz=%d", sizeof(ENERGY_METERING_DATA));
-
 		HAL_GetEnergyMeterStatus(&data);
-
+		portTickType nowTickCount = xTaskGetTickCount();
 		for (int meter_i=0; meter_i < meter_count; meter_i++) {
 			energysensdataset_t* sensdataset = &blv2_energy_meter.datasetlist[meter_i];
 			blv2_energy_meter.energy_meter_data[meter_i].actual_mday = data.actual_mday;              //one in flashvars is enough, I assume that both channels are synchronized
-			portTickType nowTickCount = xTaskGetTickCount();
 			switch (meter_i) {
 				case BL_SENSORS_IX_0: {
 					sensdataset->sensors[OBK_CONSUMPTION_TOTAL].lastReading = data.TotalConsumption;
@@ -1726,10 +1730,10 @@ void BLv2_Shared_Init(int meter_count, energySensorMode_t mode, int MeasuredSens
 					break;
 				}
 			}
-			blv2_energy_meter.ConsumptionResetTime     = data.ConsumptionResetTime;
-			blv2_energy_meter.ConsumptionSaveCounter   = data.save_counter;
-			blv2_energy_meter.lastConsumptionSaveStamp = nowTickCount;
 		}
+		blv2_energy_meter.ConsumptionResetTime     = data.ConsumptionResetTime;
+		blv2_energy_meter.ConsumptionSaveCounter   = data.save_counter;
+		blv2_energy_meter.lastConsumptionSaveStamp = nowTickCount;
 		//int HAL_SetEnergyMeterStatus(ENERGY_METERING_DATA *data);
     }
 #if ENABLED_TARIFED_ENERGY || ENABLED_MONTH_ENERGY
@@ -1755,6 +1759,10 @@ void BLv2_Shared_Init(int meter_count, energySensorMode_t mode, int MeasuredSens
 #if ENABLED_MONTH_ENERGY
 			blv2_energy_meter.energy_meter_data[meter_i].actual_month = energy_data_new.actual_month;
 			memmove((void*)&blv2_energy_meter.energy_meter_data[meter_i].month_energy, (void*)&energy_data_new.month_energy, 12*sizeof(ENERGY_DATA_V2));
+			if ((blv2_energy_meter.energy_meter_data[meter_i].actual_month > 11) || (blv2_energy_meter.energy_meter_data[meter_i].actual_month < 0)) {
+				blv2_energy_meter.energy_meter_data[meter_i].actual_month = 0;
+				memset((void*)&blv2_energy_meter.energy_meter_data[meter_i].month_energy, 0, 12*sizeof(ENERGY_DATA_V2));
+			}
 #endif
 		}
 	}
@@ -1807,7 +1815,7 @@ float DRV_GetReading_v2(int meter, energySensor_t type)
 {
 	if (!blv2_energy_meter_init) return NAN;
 	if (meter < 0) return NAN;
-	if (meter > (blv2_energy_meter.meter_count-1)) return NAN;
+	if (meter >= blv2_energy_meter.meter_count) return NAN;
 	if (!(blv2_energy_meter.outputsensors & (0x01 << type))) return NAN;
 	return (float) blv2_energy_meter.datasetlist[meter].sensors[type].lastReading;
 }
@@ -1818,7 +1826,7 @@ int BLv2_HasEnergySensorReading(int meter, energySensor_t type)
 {
 	if (!blv2_energy_meter_init) return false;
 	if (meter < 0) return false;
-	if (meter > (blv2_energy_meter.meter_count-1)) return false;
+	if (meter >= blv2_energy_meter.meter_count) return false;
 	if (type < OBK__FIRST) return false;
 	if (type > OBK__LAST) return false;
 	if (!(blv2_energy_meter.outputsensors & (0x01 << type))) return false;
@@ -1831,7 +1839,7 @@ int BLv2_HasEnergySensorReading(int meter, energySensor_t type)
 int BLv2_IsMeteringDeviceIndexActive(int meter){
 	if (!blv2_energy_meter_init) return false;
 	if (meter < 0) return false;
-	if (meter > (blv2_energy_meter.meter_count-1)) return false;
+	if (meter >= blv2_energy_meter.meter_count) return false;
 	return blv2_energy_meter.energy_meter_data[meter].sensors_reciveddata;
 }
 
@@ -1840,7 +1848,7 @@ energySensorNames_t* DRV_GetEnergySensorNames_v2(int meter, energySensor_t type)
 	// TODO hass.c not checking result !!!
 	if (!blv2_energy_meter_init) return 0;
 	if (meter < 0) return 0;
-	if (meter > (blv2_energy_meter.meter_count-1)) return 0;
+	if (meter >= blv2_energy_meter.meter_count) return 0;
 	if (!(blv2_energy_meter.outputsensors & (0x01 << type))) return 0;
 	return (energySensorNames_t*)&blv2_energy_meter.datasetlist[meter].sensors[type].names;
 }
