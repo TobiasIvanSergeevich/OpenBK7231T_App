@@ -256,6 +256,11 @@ void VKL060_OnEverySecond();
 void VKL060_AppendInformationToHTTPIndexPage(http_request_t *request, int bPreState);
 void VKL060_StopDriver();
 
+void MAX31865_Init();
+void MAX31865_RunEverySecond();
+void MAX31865_appendInformationToHTTPIndexPage(http_request_t* request, int bPreState);
+void MAX31865_Stop();
+
 void DMX_Init();
 void DMX_OnEverySecond();
 void DMX_Shutdown();

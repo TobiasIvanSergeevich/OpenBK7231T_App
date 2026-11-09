@@ -200,3 +200,8 @@ void HAL_DetachInterrupt(int pinIndex) {
 	g_handlers[pinIndex] = 0;
 }
 
+int HAL_PIN_Find(const char *name){
+	if (name == NULL) return -1;
+	if ((name[0] != 'I') && (name[1] != 'O')) return -1;
+	return atoi(name+2);
+}

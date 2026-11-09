@@ -125,6 +125,7 @@ OBKM_SRC  += $(OBK_SRCS)driver/drv_max6675.c
 OBKM_SRC  += $(OBK_SRCS)driver/drv_max72xx_clock.c
 OBKM_SRC  += $(OBK_SRCS)driver/drv_max72xx_internal.c
 OBKM_SRC  += $(OBK_SRCS)driver/drv_max72xx_single.c
+OBKM_SRC  += $(OBK_SRCS)driver/drv_max31865.c
 OBKM_SRC  += $(OBK_SRCS)driver/drv_mcp9808.c
 OBKM_SRC  += $(OBK_SRCS)driver/drv_mqttServer.c
 OBKM_SRC  += $(OBK_SRCS)driver/drv_mqttServerBerry.c
