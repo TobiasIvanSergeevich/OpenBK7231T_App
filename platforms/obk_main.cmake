@@ -104,6 +104,7 @@ set(OBKM_SRC
 	${OBK_SRCS}driver/drv_max72xx_clock.c
 	${OBK_SRCS}driver/drv_max72xx_internal.c
 	${OBK_SRCS}driver/drv_max72xx_single.c
+	${OBK_SRCS}driver/drv_max31865.c
 	${OBK_SRCS}driver/drv_mcp9808.c
 	${OBK_SRCS}driver/drv_mqttServer.c
 	${OBK_SRCS}driver/drv_mqttServerBerry.c

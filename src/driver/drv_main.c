@@ -1724,6 +1724,22 @@ static driver_t g_drivers[] = {
 	false,                                   // loaded
 	},
 #endif
+#if ENABLE_DRIVER_MAX31865
+	//drvdetail:{"name":"MAX31865",
+	//drvdetail:"title":"RTD-to-Digital Converter",
+	//drvdetail:"The MAX31865 is an easy-to-use resistance-to-digital converter optimized for platinum resistance temperature detectors (RTDs)",
+	//drvdetail:"requires":"HAL or soft SPI bus"}
+	{ "MAX31865",                            // Driver Name
+	MAX31865_Init,                           // Init
+	MAX31865_RunEverySecond,                 // onEverySecond
+	MAX31865_appendInformationToHTTPIndexPage, // appendInformationToHTTPIndexPage
+	NULL,                                    // runQuickTick
+	MAX31865_Stop,                           // stopFunction
+	NULL,                                    // onChannelChanged
+	NULL,                                    // onHassDiscovery
+	false,                                   // loaded
+	},
+#endif
 	//{ "", NULL, NULL, NULL, NULL, NULL, NULL, NULL, false },
 };
 
