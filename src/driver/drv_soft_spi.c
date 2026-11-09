@@ -11,7 +11,7 @@
 #include "../hal/hal_pins.h"
 
 //#define MY_SPI_DELAY usleep(500);
-#define MY_SPI_DELAY
+#define MY_SPI_DELAY rtos_delay_milliseconds(1);
 
 void SPI_Send(softSPI_t *spi, byte dataToSend) {
 	for (int i = 0; i < 8; i++) {
@@ -48,7 +48,8 @@ void SPI_Setup(softSPI_t *spi) {
 	//	return;
 	//spi->spi_Ready = 1;
 	HAL_PIN_Setup_Output(spi->sck);
-	HAL_PIN_Setup_Input(spi->miso);
+	//HAL_PIN_Setup_Input(spi->miso);
+	HAL_PIN_Setup_Input_Pullup(spi->miso);
 	HAL_PIN_Setup_Output(spi->mosi);
 	HAL_PIN_Setup_Output(spi->ss);
 	HAL_PIN_SetOutputValue(spi->ss, 1); // set SS_PIN to inactive
