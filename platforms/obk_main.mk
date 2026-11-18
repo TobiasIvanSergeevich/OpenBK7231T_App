@@ -177,6 +177,7 @@ OBKM_SRC  += $(OBK_SRCS)driver/drv_test.c
 #OBKM_SRC += $(OBK_SRCS)driver/drv_test_charts.c
 OBKM_SRC  += $(OBK_SRCS)driver/drv_test_drivers.c
 OBKM_SRC  += $(OBK_SRCS)driver/drv_textScroller.c
+OBKM_SRC  += $(OBK_SRCS)driver/drv_termostat.c
 OBKM_SRC  += $(OBK_SRCS)driver/drv_tinyir_nec.c
 OBKM_SRC  += $(OBK_SRCS)driver/drv_tm1637.c
 OBKM_SRC  += $(OBK_SRCS)driver/drv_tm1638.c

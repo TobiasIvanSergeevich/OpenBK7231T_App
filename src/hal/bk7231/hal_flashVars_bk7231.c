@@ -249,4 +249,30 @@ void HAL_FlashVars_GetEnergy_BLv2(ENERGY_METERING_DATA_V2* data, int meter) {
 	}	
 }
 
+void HAL_SaveTermostatStatistic(TERMOSTAT_STATISTIC_DATA* data) {
+	if(data != NULL)
+	{
+		InitEasyFlashIfNeeded();
+		EfErrCode res;
+		res = ef_set_env_blob("TERMOSTAT", data, sizeof(TERMOSTAT_STATISTIC_DATA));
+		if(res == EF_ENV_INIT_FAILED) {
+			ADDLOG_DEBUG(LOG_FEATURE_CFG, "%s: init failed for %d b", __func__, sizeof(TERMOSTAT_STATISTIC_DATA));
+			return;
+		}
+		if(res == EF_ENV_NAME_ERR) {
+			ADDLOG_DEBUG(LOG_FEATURE_CFG, "%s: name err for %d b", __func__, sizeof(TERMOSTAT_STATISTIC_DATA));
+			return;
+		}
+		ADDLOG_DEBUG(LOG_FEATURE_CFG, "%s: saved %d b", __func__, sizeof(TERMOSTAT_STATISTIC_DATA));
+	}	
+}	
+/**/
+void HAL_LoadTermostatStatistic(TERMOSTAT_STATISTIC_DATA* data) {
+	if(data != NULL)
+	{
+		int readLen = ef_get_env_blob("TERMOSTAT", data, sizeof(TERMOSTAT_STATISTIC_DATA), NULL);		 
+		ADDLOG_DEBUG(LOG_FEATURE_CFG, "%s: read %d b", __func__, readLen);
+	}	
+}
+
 #endif

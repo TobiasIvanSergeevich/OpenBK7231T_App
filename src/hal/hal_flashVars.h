@@ -89,6 +89,20 @@ typedef struct {
 
 #endif
 
+#if defined(ENABLE_DRIVER_TERMOSTAT)
+typedef struct {
+	long 	switches_cnt;
+	time_t 	heater_on_tm;
+} TERMOSTAT_HEATER_DATA;
+
+typedef struct {
+	TERMOSTAT_HEATER_DATA heater[3];	
+	unsigned short	magic;
+	unsigned char	rotate_schema[3];
+	unsigned char	crc;
+} TERMOSTAT_STATISTIC_DATA;
+#endif
+
 typedef struct flash_vars_structure
 {
 	// offset  0
@@ -131,6 +145,11 @@ void HAL_FlashVars_GetEnergy(ENERGY_DATA* data, ENERGY_CHANNEL channel);
 #if defined(ENABLE_BLv2_SHARED) 
 void HAL_FlashVars_SaveEnergy_BLv2(ENERGY_METERING_DATA_V2* data, int meter);
 void HAL_FlashVars_GetEnergy_BLv2(ENERGY_METERING_DATA_V2* data, int meter);
+#endif
+
+#if defined(ENABLE_DRIVER_TERMOSTAT)
+void HAL_SaveTermostatStatistic(TERMOSTAT_STATISTIC_DATA* data);
+void HAL_LoadTermostatStatistic(TERMOSTAT_STATISTIC_DATA* data);
 #endif
 
 #endif /* __HALK_FLASH_VARS_H__ */

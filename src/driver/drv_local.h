@@ -385,3 +385,9 @@ void ATMS_StopDriver();
 void ATMS_AppendInformationToHTTPIndexPage(http_request_t *request, int bPreState);
 void ATMS_RunEverySecond();
 void ATMS_runQuickTick();
+
+void Termostat_Init();
+void Termostat_appendInformationToHTTPIndexPage(http_request_t* request, int bPreState);
+void Termostat_RunEverySecond();
+void Termostat_onChannelChanged(int channel, int iVal);
+void Termostat_Stop();

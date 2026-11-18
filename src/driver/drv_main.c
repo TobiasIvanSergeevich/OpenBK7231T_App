@@ -1740,6 +1740,22 @@ static driver_t g_drivers[] = {
 	false,                                   // loaded
 	},
 #endif
+#if ENABLE_DRIVER_TERMOSTAT
+	//drvdetail:{"name":"TERMOSTAT",
+	//drvdetail:"title":"Termostat control",
+	//drvdetail:"TODO",
+	//drvdetail:"requires":"Boiler water temperature channel, requred power channel, "}
+	{ "Termostat",                            // Driver Name
+	Termostat_Init,                           // Init
+	Termostat_RunEverySecond,                 // onEverySecond
+	Termostat_appendInformationToHTTPIndexPage, // appendInformationToHTTPIndexPage
+	NULL,                                    // runQuickTick
+	Termostat_Stop,                          // stopFunction
+	Termostat_onChannelChanged,              // onChannelChanged
+	NULL,                                    // onHassDiscovery
+	false,                                   // loaded
+	},
+#endif
 	//{ "", NULL, NULL, NULL, NULL, NULL, NULL, NULL, false },
 };
 
